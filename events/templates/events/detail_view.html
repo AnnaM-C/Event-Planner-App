@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<body>
+<h2>{{ event.title }}</h2><hr>
+<p> {{ event.description }}</p><hr>
+<p> Created:{{ event.created_at }}</p>
+<p> Last Updated: {{ event.updated_at }}</p>
+<hr/>
+<input type="button" onclick="location.href='{% url 'events_update' event.id %}';" value="Edit" />
+<input type="button" onclick="location.href='{% url 'events_delete' event.id %}';" value="Delete" />
+<hr/>
+ {% include 'events/task_list.html' with nid=event.id %}
+ <input type="button" onclick="location.href='{% url 'create_task' event.id %}';" value="Create Task" />
+ </body>
+{% endblock content %}

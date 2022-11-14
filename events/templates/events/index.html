@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %} <title>Events Page</title>
+{% endblock title%} {% block content %}
+<h1>This is My Events Page</h1>
+
+    <table>
+        <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Created</th>
+        <th>Updated</th>
+        </tr>
+        {% for event in events_list %}
+        <tr> <td>
+        <a href="{% url 'events_detail' event.id %}">
+            {{ event.title | truncatechars:20}}</a>
+        </td>
+        <td>
+            {{ event.description  | truncatechars:25}}
+        </td>
+        <td>
+            {{event.created_at}}
+    </td> <td>
+            {{event.updated_at}}
+        </td>
+        </tr>
+        {% endfor %}
+        </table> <hr/>
+
+
+    <input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
+
+{% endblock content %}

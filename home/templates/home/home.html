@@ -1,9 +1,6 @@
-<html>
-    <head>
-        <title></title>
-    </head>
-    <body>
-        <h1>This is My Home Page<h1>
-        <p> Rendering template home.html from home method in views.py </p>
-    </body>
-</html>
+{% extends "base.html" %}
+{% block title %} <title>Home Page</title>
+{% endblock title%} {% block content %}
+<h1>This is My Home Page</h1>
+<p>Rendering template /home/home.html</p>
+{% endblock content %}

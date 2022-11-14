@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'events.apps.EventsConfig',
     'contact.apps.ContactConfig',
+    'tasks.apps.TasksConfig',
+    'agenda.apps.AgendaConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,7 +59,7 @@ ROOT_URLCONF = 'EventPlanner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,3 +126,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATIC_ROOT = BASE_DIR/'static'
+SASS_PROCESSOR_ROOT = STATIC_ROOT
+STATICFILES_FINDERS = [ 
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'sass_processor.finders.CssFinder',
+]
+
+DEFAULT_FROM_EMAIL = "ac02351@surrey.ac.uk"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
