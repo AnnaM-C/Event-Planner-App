@@ -1,6 +1,14 @@
 {% extends "base.html" %}
-{% block title %} <title>Contact Home</title>
-{% endblock title%} {% block content %}
-<h1>This is My Contact Page</h1>
-<p>Rendering template /contact/contact.html</p>
-{% endblock content %}
+{% block title %}
+<title>Notes Contact</title>
+{% endblock title%}
+{% block content %}
+<h1>Contact Us</h1>
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<div class="form-actions">
+<button type="submit">Send</button>
+</div>
+</form>
+{% endblock content %} 

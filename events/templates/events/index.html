@@ -1,14 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %} <title>Events Page</title>
 {% endblock title%} {% block content %}
 <h1>This is My Events Page</h1>
 
-    <table>
+    {% comment %} <table>
         <tr>
         <th>Title</th>
         <th>Description</th>
         <th>Created</th>
         <th>Updated</th>
+        <th>Date</th>
         </tr>
         {% for event in events_list %}
         <tr> <td>
@@ -20,14 +22,69 @@
         </td>
         <td>
             {{event.created_at}}
-    </td> <td>
+        </td> 
+        <td>
             {{event.updated_at}}
+        </td>
+        <td>
+            {{event.date}}
         </td>
         </tr>
         {% endfor %}
-        </table> <hr/>
+        </table> <hr/> {% endcomment %}
 
 
-    <input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
+<div class="group-of-cards row row-cols-1 row-cols-md-3 g-4">
+    <div class="col">
+    <div class="card" style="width: 18rem;">
+        <img src="{% static "images/beach1.jpg" %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Past Events</h5>
+          <ul class="list-group list-group-flush">
+            {% if events_future|length == 0 %}
+            <li class="list-group-item">No events</li>
+            {% else %}
+            <li class="list-group-item">{{ events_past.0 }}</li>
+            {% endif %}
+          </ul>
+          <a onclick="location.href='{% url 'past_events'%}';" href="#" class="btn btn-primary">More Events</a>
+        </div>
+    </div>
+    </div>
+    <div class="col">
+    <div class="card" style="width: 18rem;">
+        <img src="{% static "images/city.jpg" %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Events < Week Away</h5>
+          <ul class="list-group list-group-flush">
+            {% if events_future|length == 0 %}
+            <li class="list-group-item">No events</li>
+            {% else %}
+            <li class="list-group-item">{{ events_week.0 }}</li>
+            {% endif %}
+          </ul>
+          <a onclick="location.href='{% url 'thisweek_events'%}';" href="#" class="btn btn-primary">More Events</a>
+        </div>
+    </div>
+    </div>
+    <div class="col">
+    <div class="card" style="width: 18rem;">
+        <img src="{% static "images/country1.jpg" %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Events > Week Away</h5>
+          <ul class="list-group list-group-flush">
+            {% if events_future|length == 0 %}
+            <li class="list-group-item">No events</li>
+            {% else %}
+            <li class="list-group-item">{{ events_future.0 }}</li>
+            {% endif %}
+          </ul>
+          <a onclick="location.href='{% url 'future_events'%}';" href="#" class="btn btn-primary">More Events</a>
+        </div>
+    </div>
+</div>
+</div>
+
+<input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
 
 {% endblock content %}

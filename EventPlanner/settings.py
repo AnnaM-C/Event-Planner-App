@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'events.apps.EventsConfig',
     'contact.apps.ContactConfig',
     'tasks.apps.TasksConfig',
+    'sass_processor',
     'agenda.apps.AgendaConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -137,3 +138,10 @@ STATICFILES_FINDERS = [
 
 DEFAULT_FROM_EMAIL = "ac02351@surrey.ac.uk"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+STATICFILE_DIRS = [
+ BASE_DIR / "events/static"
+]
+
+LOGIN_REDIRECT_URL = "/notes/" 
+LOGOUT_REDIRECT_URL = "/"

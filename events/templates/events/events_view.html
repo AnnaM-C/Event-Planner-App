@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %} <title>Events Page</title>
+{% endblock title%} {% block content %}
+<h1>Events Page</h1>
+
+    <table>
+        <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Created</th>
+        <th>Updated</th>
+        <th>Date</th>
+        </tr>
+        {% comment %} {% for event in events_list %}
+        <tr> <td>
+        <a href="{% url 'events_detail' event.id %}">
+            {{ event.title | truncatechars:20}}</a>
+        </td>
+        <td>
+            {{ event.description  | truncatechars:25}}
+        </td>
+        <td>
+            {{event.created_at}}
+        </td> 
+        <td>
+            {{event.updated_at}}
+        </td>
+        <td>
+            {{event.date}}
+        </td>
+        </tr>
+        {% endfor %}
+        </table> <hr/> {% endcomment %}
+
+
+    <input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
+
+    {% for event in events_list %}
+    <div class="card text-center">
+        <div class="card-header">
+          Featured
+        </div>
+        <div class="card-body">
+          <h5 class="card-title"><a href="{% url 'events_detail' event.id %}">
+            {{ event.title | truncatechars:20}}</a></h5>
+          <p class="card-text"> {{event.description}}</p>
+          <a href="#" class="btn btn-primary">Tasks</a>
+        </div>
+        <div class="card-footer text-muted">
+            {{ event.date }}
+            {% comment %} {{event.date}}{% now "d-m-y" %} {% endcomment %}
+        </div>
+      </div>
+      {% endfor %}
+
+{% endblock content %}
