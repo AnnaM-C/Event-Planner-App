@@ -6,7 +6,7 @@ class EventForm(forms.ModelForm):
     class Meta:
     # specify model to be used
         model = Event
-        fields = ['title', 'description', 'date']
+        fields = ['title', 'description', 'date', 'author']
         widgets = {
             'title': forms.TextInput(attrs={
             'class': 'formfield',
@@ -19,6 +19,7 @@ class EventForm(forms.ModelForm):
             'cols' : 60,
             }),
             'date': forms.DateTimeInput(),
+            'author': forms.HiddenInput(),
         }
 
 class TaskForm(forms.ModelForm):

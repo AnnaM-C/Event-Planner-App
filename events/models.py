@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime
 from .validators import *
+from django.contrib.auth.models import User
 
 #Event
 class Event(models.Model):
@@ -8,6 +9,7 @@ class Event(models.Model):
  description = models.TextField(blank=False)
  date = models.DateTimeField(default=datetime.now, blank=False, validators=[present_or_future_date])
  updated_at = models.DateTimeField(auto_now=True)
+ author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
  def __str__(self): 
     return self.title

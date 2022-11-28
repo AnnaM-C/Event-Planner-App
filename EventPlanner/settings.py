@@ -143,5 +143,5 @@ STATICFILE_DIRS = [
  BASE_DIR / "events/static"
 ]
 
-LOGIN_REDIRECT_URL = "/notes/" 
-LOGOUT_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/events/" 
+LOGOUT_REDIRECT_URL = "/home/"

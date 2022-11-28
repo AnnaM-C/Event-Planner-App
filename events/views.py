@@ -8,27 +8,42 @@ from django.urls import reverse_lazy
 from django.views.generic import View 
 from django.http import JsonResponse
 from datetime import datetime, timedelta
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+
+def is_admin(user):
+    return user.groups.filter(name='NotesAdminUsers').exists()
 
 # Events Views
+@login_required
 def events_index_view(request):
     context = {}
     context["events_list"] = Event.objects.all()
     context["events_past"] = Event.objects.filter(date__lt = datetime.today())
     context["events_week"] = Event.objects.filter(date__range = [datetime.today(), datetime.today()+timedelta(days=7)])
     context["events_future"] = Event.objects.filter(date__gt = datetime.today()+timedelta(days=7))
+    context["note_list"] = Event.objects.filter(author=request.user)
+    if is_admin(request.user): 
+        context["note_list"] = Event.objects.all()
+    else:
+        context["note_list"] = Event.objects.filter(author=request.user)
     return render(request, 'events/index.html', context)
 
+@login_required
 def index_past_events(request):
     context = {}
     context["events_list"] = Event.objects.filter(date__lt = datetime.today())
     return render(request, 'events/events_view.html', context)
 
+@login_required
 def index_nextweek_events(request):
     context = {}
     context["events_list"] = Event.objects.filter(date__range = [datetime.today(), datetime.today()+timedelta(days=7)])
     context['today'] = datetime.today()
     return render(request, 'events/events_view.html', context)
 
+@login_required
 def index_future_events(request):
     context = {}
     context["events_list"] = Event.objects.filter(date__gt = datetime.today()+timedelta(days=7))
@@ -36,19 +51,24 @@ def index_future_events(request):
     return render(request, 'events/events_view.html', context)
 
 # view
-class EventDetailView(DetailView): 
+class EventDetailView(LoginRequiredMixin, DetailView): 
     model = Event
     template_name = 'events/detail_view.html'
     def get_context_data(self, **kwargs):
+        event = Event.objects.get(id=self.kwargs['pk'])
         context = {}
-        context['event'] = Event.objects.get(id=self.kwargs['pk']) 
-        context['task_list'] = Task.objects.filter(event__id=self.kwargs['pk'])
+        if(self.request.user == event.author or is_admin(self.request.user)):
+            context['event'] = Event.objects.get(id=self.kwargs['pk']) 
+            context['task_list'] = Task.objects.filter(event__id=self.kwargs['pk'])
+        else:
+            raise PermissionDenied()
         return context
 
 # create
+@login_required
 def events_create_view(request):
     context = {}
-    form = EventForm(request.POST or None)
+    form = EventForm(request.POST or None, initial={'author':request.user})
     if(request.method == 'POST'):
         if form.is_valid():
             form.save()
@@ -61,10 +81,13 @@ def events_create_view(request):
     return render(request, "events/create_view.html", context)
 
 # update
+@login_required
 def events_update_view(request, nid):
     context ={}
     # fetch the object related to passed id
     obj = get_object_or_404(Event, id = nid)
+    if(obj.author != request.user and not(is_admin(request.user))):
+        raise PermissionDenied()
     # pass the object as instance in form
     form = EventForm(request.POST or None, instance = obj)
     # save the data from the form and
@@ -78,9 +101,12 @@ def events_update_view(request, nid):
     return render(request, "events/update_view.html", context)
 
 # delete
+@login_required
 def events_delete_view(request, nid):
     # fetch the object related to passed id
     obj = get_object_or_404(Event, id = nid)
+    if(obj.author != request.user and not(is_admin(request.user))):
+        raise PermissionDenied()
     # delete object
     obj.delete()
     messages.add_message(request, messages.SUCCESS, 'Event Deleted') # after deleting redirect to index view
@@ -110,7 +136,7 @@ def events_delete_view(request, nid):
 #     context["form"] = form
 #     return render(request, "events/update_view.html", context)
 
-class TaskListView(ListView):
+class TaskListView(LoginRequiredMixin, ListView):
  model = Task
  template_name = 'events/task_list.html'
  context_object_name = 'task_list'
@@ -124,7 +150,7 @@ class TaskListView(ListView):
 #     context['task_list'] = tasks
 #     return render(request, 'events/task_list.html', context)
 
-class CreateTaskView(CreateView):
+class CreateTaskView(LoginRequiredMixin, CreateView):
  model = Task
  form_class = TaskForm
  template_name = "events/create_view.html"
@@ -150,7 +176,7 @@ class CreateTaskView(CreateView):
 #     context['form']= form
 #     return render(request, "events/create_view.html", context)
 
-class CompleteTaskView(View):
+class CompleteTaskView(LoginRequiredMixin, View):
  def get(self, request):
   tid = request.GET.get('task_id')
   task = get_object_or_404(Task, pk=tid)
@@ -160,7 +186,7 @@ class CompleteTaskView(View):
 
   return JsonResponse({'complete': task.complete, 'tid': tid}, status=200)
 
-class DeleteTaskView(View):
+class DeleteTaskView(LoginRequiredMixin, View):
  def get(self, request):
   tid = request.GET.get('task_id')
   try:
@@ -170,7 +196,7 @@ class DeleteTaskView(View):
   task.delete()
   return JsonResponse({'delete_success': True, 'tid': tid}, status=200)
 
-class EditTaskView(View):
+class EditTaskView(LoginRequiredMixin, View):
      def get(self, request):
         tid = request.GET.get('id', None)
         ttitle = request.GET.get('title', None)
@@ -194,6 +220,3 @@ class EditTaskView(View):
             'task': task
         }
         return JsonResponse(data)
-
-def is_admin(user):
-    return user.groups.filter(name='NotesAdminUsers').exists()
