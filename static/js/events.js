@@ -46,7 +46,6 @@ $("form#updateTask").submit(async function() {
         $.ajax({
             // url: '{% "task_ajax_update" %}',
             url: '/events/edittask',
-            type: 'get',
             data: {
                 id: idInput,
                 title: titleInput,
@@ -68,11 +67,12 @@ $("form#updateTask").submit(async function() {
 });
 
 // Update Django Ajax Call
-function editTask(id) {
+function editTask(id, eid) {
     if (id) {
       tr_id = "#task-" + id;
       title = $(tr_id).find(".taskTitle").text();
       description = $(tr_id).find(".taskDescription").text();
+      $('#event-id').val(eid);
       $('#task-id').val(id);
       $('#task-title').val(title);
       $('#task-description').val(description);
@@ -86,6 +86,27 @@ function updateToTaskTable(task){
         $(this).text(task.title);
         } else if (attr == "description") {
         $(this).text(task.description);
+        }
+    });
+}
+
+
+async function setPublish(event_id) {
+    $.ajax({
+        url: 'publish',
+        type: 'get',
+        data: {
+            event_id: event_id,
+        },
+        success: function(response) {
+            if(response.publish == true)
+            {
+               $("#published").html("Published");
+            }
+            else
+            {
+                $("#published").html("Not published");
+            }
         }
     });
 }

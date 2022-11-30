@@ -28,4 +28,4 @@ def contact(request):
             return redirect(reverse('home'))
         else:
             messages.add_message(request, messages.ERROR, 'Invalid Form Data; Message Not Sent')
-    return render(request, 'homeapp/contact.html', {"form": form})
+    return render(request, 'contact/contact.html', {"form": form})

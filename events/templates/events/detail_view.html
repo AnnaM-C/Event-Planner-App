@@ -2,7 +2,7 @@
 {% block content %}
 {% load static %}
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
-<body>
+
 <h2>{{ event.title }}</h2><hr>
 <p> {{ event.description }}</p><hr>
 <p> Created:{{ event.created_at }}</p>
@@ -15,5 +15,6 @@
  {% include 'events/modal_view.html' with nid=event.id %}
 
  <input type="button" onclick="location.href='{% url 'create_task' event.id %}';" value="Create Task" />
- </body>
 {% endblock content %}
+{% block javascript %}
+{% endblock javascript %}

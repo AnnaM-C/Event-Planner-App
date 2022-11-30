@@ -1,6 +1,6 @@
+{% block content %}
 {% load static %}
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
-
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -8,19 +8,24 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
           <h4 class="modal-title" id="myModalLabel">Update Task</h4>
         </div>
-        <form id="updateTask" action="">
-        <div class="modal-body">
-            <input class="form-control" id="task-id" type="hidden" name="formId"/>
-            <label for="title">Title</label>
-            <input class="form-control" id="task-title" type="text" name="formTitle"/>
-            <label for="description">Description</label>
-            <input class="form-control" id="task-description" type="text" name="formDescription"/>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-primary" >Save changes</button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
+        <form id="updateTask" method="POST" action="edittask">
+          {% csrf_token %}
+          <div class="modal-body">
+              <input class="form-control" id="event-id" type="hidden" name="eventId"/>
+              <input class="form-control" id="task-id" type="hidden" name="taskId"/>
+              <label for="title">Title</label>
+              <input class="form-control" id="task-title" type="text" name="taskTitle"/>
+              <label for="description">Description</label>
+              <input class="form-control" id="task-description" type="text" name="taskDescription"/>
+          </div>
+          <div class="modal-footer">
+              <button type="submit" class="btn btn-primary" >Save changes</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
         </form>
       </div>
     </div>
   </div>
+  {% endblock %}
+  {% block javascript %}
+  {% endblock javascript %}

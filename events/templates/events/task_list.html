@@ -1,3 +1,4 @@
+{% block content %}
 {% load static %}
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
 
@@ -18,11 +19,14 @@
 {% endif %}
  </div>
 <button class="task_button" onClick='event.stopPropagation();delete_t({{ task.id }});' type='button'>X</button>
-<button class="task_edit_button" onClick='editTask({{ task.id }});' data-toggle="modal" data-target="#myModal" type='button'>Edit</button>
+<button class="task_edit_button" onClick='editTask({{ task.id }}, {{ nid }});' data-toggle="modal" data-target="#myModal" type='button'>Edit</button>
 
 <hr/>
 
 {% endfor %}
+{% endblock %}
+{% block javascript %}
+{% endblock javascript %}
 
 {% comment %} {% load static %}
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>

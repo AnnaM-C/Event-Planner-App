@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} <title>Events Page</title>
+
+{% block title %} <title>Events</title>
 {% endblock title%} {% block content %}
 <h1>This is My Events Page</h1>
 
@@ -32,7 +33,9 @@
         </tr>
         {% endfor %}
         </table> <hr/> {% endcomment %}
-
+<div>
+<p>{% lorem 1 b random %}<p>
+<input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
 
 <div class="group-of-cards row row-cols-1 row-cols-md-3 g-4">
     <div class="col">
@@ -41,7 +44,7 @@
         <div class="card-body">
           <h5 class="card-title">Past Events</h5>
           <ul class="list-group list-group-flush">
-            {% if events_future|length == 0 %}
+            {% if events_past|length == 0 %}
             <li class="list-group-item">No events</li>
             {% else %}
             <li class="list-group-item">{{ events_past.0 }}</li>
@@ -57,7 +60,7 @@
         <div class="card-body">
           <h5 class="card-title">Events < Week Away</h5>
           <ul class="list-group list-group-flush">
-            {% if events_future|length == 0 %}
+            {% if events_week|length == 0 %}
             <li class="list-group-item">No events</li>
             {% else %}
             <li class="list-group-item">{{ events_week.0 }}</li>
@@ -85,6 +88,6 @@
 </div>
 </div>
 
-<input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
+
 
 {% endblock content %}

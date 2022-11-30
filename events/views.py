@@ -6,48 +6,62 @@ from django.shortcuts import (get_object_or_404, render, redirect)
 from .forms import EventForm, TaskForm
 from django.urls import reverse_lazy
 from django.views.generic import View 
-from django.http import JsonResponse
-from datetime import datetime, timedelta
+from django.http import JsonResponse, HttpResponseRedirect
+from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
+
 
 def is_admin(user):
-    return user.groups.filter(name='NotesAdminUsers').exists()
+    return user.groups.filter(name='EventsAdminUsers').exists()
 
 # Events Views
 @login_required
 def events_index_view(request):
     context = {}
-    context["events_list"] = Event.objects.all()
-    context["events_past"] = Event.objects.filter(date__lt = datetime.today())
-    context["events_week"] = Event.objects.filter(date__range = [datetime.today(), datetime.today()+timedelta(days=7)])
-    context["events_future"] = Event.objects.filter(date__gt = datetime.today()+timedelta(days=7))
-    context["note_list"] = Event.objects.filter(author=request.user)
     if is_admin(request.user): 
-        context["note_list"] = Event.objects.all()
+        # context["events_list"] = Event.objects.all()
+        context["events_past"] = Event.objects.filter(date__lt = timezone.now())
+        context["events_week"] = Event.objects.filter(date__range = [timezone.now(), timezone.now()+timedelta(days=7)])
+        context["events_future"] = Event.objects.filter(date__gt = timezone.now()+timedelta(days=7))
     else:
-        context["note_list"] = Event.objects.filter(author=request.user)
+        # context["events_list"] = Event.objects.filter(author=request.user)
+        context["events_past"] = Event.objects.filter(author=request.user, date__lt = timezone.now())
+        context["events_week"] = Event.objects.filter(author=request.user, date__range = [timezone.now(), timezone.now()+timedelta(days=7)])
+        context["events_future"] = Event.objects.filter(author=request.user, date__gt = timezone.now()+timedelta(days=7))
     return render(request, 'events/index.html', context)
 
 @login_required
 def index_past_events(request):
     context = {}
-    context["events_list"] = Event.objects.filter(date__lt = datetime.today())
+    if is_admin(request.user): 
+        context["events_list"] = Event.objects.filter(date__lt = timezone.now())
+    else:
+        context["events_list"] = Event.objects.filter(date__lt = timezone.now(), author=request.user)
     return render(request, 'events/events_view.html', context)
 
 @login_required
 def index_nextweek_events(request):
     context = {}
-    context["events_list"] = Event.objects.filter(date__range = [datetime.today(), datetime.today()+timedelta(days=7)])
-    context['today'] = datetime.today()
+    if is_admin(request.user): 
+        context["events_list"] = Event.objects.filter(date__range = [timezone.now(), timezone.now()+timedelta(days=7)])
+        context['today'] = timezone.now()
+    else:
+        context["events_list"] = Event.objects.filter(date__range = [timezone.now(), timezone.now()+timedelta(days=7)], author=request.user)
+        context['today'] = timezone.now()
     return render(request, 'events/events_view.html', context)
 
 @login_required
 def index_future_events(request):
     context = {}
-    context["events_list"] = Event.objects.filter(date__gt = datetime.today()+timedelta(days=7))
-    context['today'] = datetime.today()
+    if is_admin(request.user): 
+        context["events_list"] = Event.objects.filter(date__gt = timezone.now()+timedelta(days=7))
+        context['today'] = timezone.now()
+    else:
+        context["events_list"] = Event.objects.filter(date__gt = timezone.now()+timedelta(days=7), author=request.user)
+        context['today'] = timezone.now()
     return render(request, 'events/events_view.html', context)
 
 # view
@@ -197,26 +211,45 @@ class DeleteTaskView(LoginRequiredMixin, View):
   return JsonResponse({'delete_success': True, 'tid': tid}, status=200)
 
 class EditTaskView(LoginRequiredMixin, View):
-     def get(self, request):
-        tid = request.GET.get('id', None)
-        ttitle = request.GET.get('title', None)
-        tdescription = request.GET.get('description', None)
-        # tdeadline = request.GET.get('deadline', None)
-        # tcomplete = request.GET.get('complete', None)
-        # tevent = request.GET.get('event', None)
-        # tperson = request.GET.get('person', None)
+     def post(self, request):
+        obj = Task.objects.filter(id = request.POST.get('taskId'))
+        obj.update(title = request.POST.get('taskTitle'),description = request.POST.get('taskDescription'))
+        # print(request.POST.get('eventId'))
+        return HttpResponseRedirect('' + request.POST.get('eventId'))
+        # return reverse_lazy('events_detail', kwargs={'pk':request.POST.get('eventId')})
 
-        obj = Task.objects.get(id = tid)
-        obj.title = ttitle
-        obj.description = tdescription
-        # obj.deadline = tdeadline
-        # obj.complete = tcomplete
-        # obj.event = tevent
-        # obj.person = tperson
-        obj.save()
+    #  def get(self, request):
+        # eid = self.kwargs['pk']
+        # print(eid)
+        # tid = request.GET.get('id', None)
+        # ttitle = request.GET.get('title', None)
+        # tdescription = request.GET.get('description', None)
+        # # tdeadline = request.GET.get('deadline', None)
+        # # tcomplete = request.GET.get('complete', None)
+        # # tevent = request.GET.get('event', None)
+        # # tperson = request.GET.get('person', None)
 
-        task = {'id':obj.id, 'title':obj.title, 'description':obj.description, 'deadline':obj.deadline, 'complete': obj.complete, 'event': obj.event, 'person': obj.person}
-        data = {
-            'task': task
-        }
-        return JsonResponse(data)
+        # obj = Task.objects.get(id = tid)
+        # obj.title = ttitle
+        # obj.description = tdescription
+        # # obj.deadline = tdeadline
+        # # obj.complete = tcomplete
+        # # obj.event = tevent
+        # # obj.person = tperson
+        # obj.save()
+
+        # task = {'id':obj.id, 'title':obj.title, 'description':obj.description}
+        # data = {
+        #     'task': task
+        # }
+        # return JsonResponse(data)
+
+class PublishEvent(LoginRequiredMixin, View):
+ def get(self, request):
+  eid = request.GET.get('event_id')
+  event = get_object_or_404(Event, pk=eid)
+
+  event.publish = not(event.publish)
+  event.save()
+
+  return JsonResponse({'publish': event.publish, 'eid': eid}, status=200)

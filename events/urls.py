@@ -14,9 +14,9 @@ urlpatterns = [
     path('future', views.index_future_events, name="future_events"),
     # events/new
     path('new', views.events_create_view, name='events_new'),
+
     #events/edit/id
     path('edit/<int:nid>', views.events_update_view, name='events_update'),
-
     #events/delete/id
     path('delete/<int:nid>', views.events_delete_view, name='events_delete'),
 
@@ -32,7 +32,9 @@ urlpatterns = [
     #/events/deletetask
     path('deletetask', views.DeleteTaskView.as_view(), name='delete_task'),
 
-    path('edittask', views.EditTaskView.as_view(), name='task_ajax_update')
+    path('edittask', views.EditTaskView.as_view(), name='task_ajax_update'),
     #tasks edit
     # path('edit/<int:nid>/task/<int:nid>', views.task_update_view, name='tasks_update'),
+    path('publish', views.PublishEvent.as_view(), name='publish_ajax_event')
+
 ]

@@ -1,6 +1,10 @@
 {% extends "base.html" %}
+
 {% block title %} <title>Events Page</title>
-{% endblock title%} {% block content %}
+{% endblock title%} 
+{% block content %}
+{% load static %}
+<script type="text/javascript" src="{% static 'js/events.js' %}"></script>
 <h1>Events Page</h1>
 
     <table>
@@ -34,6 +38,7 @@
 
 
     <input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
+    <p id="published"></p>
 
     {% for event in events_list %}
     <div class="card text-center">
@@ -44,7 +49,8 @@
           <h5 class="card-title"><a href="{% url 'events_detail' event.id %}">
             {{ event.title | truncatechars:20}}</a></h5>
           <p class="card-text"> {{event.description}}</p>
-          <a href="#" class="btn btn-primary">Tasks</a>
+          <a href="{% url 'events_detail' event.id %}" class="btn btn-primary">Tasks</a>
+          <button onClick='setPublish({{event.id}});' class="btn btn-primary">Publish</button>
         </div>
         <div class="card-footer text-muted">
             {{ event.date }}
