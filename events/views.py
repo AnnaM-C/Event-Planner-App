@@ -33,6 +33,7 @@ def events_index_view(request):
         context["events_future"] = Event.objects.filter(author=request.user, date__gt = timezone.now()+timedelta(days=7))
     return render(request, 'events/index.html', context)
 
+
 @login_required
 def index_past_events(request):
     context = {}
@@ -83,10 +84,12 @@ class EventDetailView(LoginRequiredMixin, DetailView):
 def events_create_view(request):
     context = {}
     form = EventForm(request.POST or None, initial={'author':request.user})
+    print(request.POST)
     if(request.method == 'POST'):
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, 'Event Created')
+            print(request)
             return redirect('events_index')
         else:
             messages.add_message(request, messages.ERROR, 'Invalid Form Data; Event not created')

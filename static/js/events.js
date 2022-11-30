@@ -110,3 +110,40 @@ async function setPublish(event_id) {
         }
     });
 }
+
+// async function register(event, user) {
+//     $.ajax({
+//         url: 'home/register',
+//         type: 'post',
+//         data: {
+//             event: event,
+//             user: user,
+//         },
+//         success: function(response) {
+//             // Display message registered
+//             if(response) {
+//                 alert("All fields must have a valid value.");
+//             }
+//     }
+
+//     });
+// }
+
+async function register(event_id, user_id) {
+        $.ajax({
+            // url: '{% "task_ajax_update" %}',
+            url: '/home/register',
+            type: 'get',
+            data: {
+                event_id: event_id,
+                user_id: user_id,
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.register_success == true) {
+                    alert("Updated.");
+                }
+            }
+        })
+}
+    

@@ -1,18 +1,28 @@
 {% extends "base.html" %}
-{% block title %} <title>Home Page</title>
-{% endblock title%} {% block content %}
+{% block title %} 
+<title>Home Page</title>
+{% endblock title%} 
+{% block content %}
+{% load static %}
+<script type="text/javascript" src="{% static 'js/events.js' %}"></script>
+
 <h1>This is My Home Page</h1>
 <p>Rendering template /home/home.html</p>
 {% for event in events_list %}
 
-<div class="card" style="width: 18rem;">
-    {% comment %} <img src="{% static "images/beach1.jpg" %}" class="card-img-top" alt="..."> {% endcomment %}
-    <div class="card-body">
-      <h5 class="card-title">{{ event.title | truncatechars:20}}</h5>
-      <h5 class="card-title">{{ event.description | truncatechars:20}}</h5>
-      <p class="list-group list-group-flush">{{ event.date }}</p>
+{% comment %} <form id="registerEvent" method="POST">
+    {% csrf_token %} {% endcomment %}
+    <div class="card" style="width: 18rem;">
+        {% comment %} <img src="{% static "images/beach1.jpg" %}" class="card-img-top" alt="..."> {% endcomment %}
+        <input class="form-control" id="event-id" type="hidden" value ="{{event}}", name="event"/>
+        <input class="form-control" id="user-id" type="hidden" value ="{{user}}", name="user"/>
+        <h5 class="card-title">{{ event.title | truncatechars:20}}</h5>
+        <h5 class="card-title">{{ event.description | truncatechars:20}}</h5>
+        <h5 class="card-title">{{ event.id}}</h5>
+        <p class="list-group list-group-flush">{{ event.date }}</p>
+        <button onClick='register({{event.id}}, {{user.id}});'>Register</button>
     </div>
-</div>
+</form>
 
 {% endfor %}
 

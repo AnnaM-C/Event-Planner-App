@@ -18,7 +18,7 @@ class EventForm(forms.ModelForm):
             'rows' : 25,
             'cols' : 60,
             }),
-            'date': forms.DateTimeInput(),
+            'date': forms.DateInput(),
             'author': forms.HiddenInput(),
         }
 
