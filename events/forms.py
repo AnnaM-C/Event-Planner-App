@@ -30,15 +30,15 @@ class TaskForm(forms.ModelForm):
   fields = ['title', 'description', 'deadline', 'complete', 'event', 'person']
   widgets = {
   'title': forms.TextInput(attrs={
-  'class': 'formfield',
-  'placeholder': 'Task Title',
-  }),
+    'class': 'formfield',
+    'placeholder': 'Task Title',
+    }),
   'description': forms.Textarea(attrs={
-            'class': 'formfield',
-            'placeholder': 'Task Description',
-            'rows' : 5,
-            'cols' : 40,
-  }),
+    'class': 'formfield',
+    'placeholder': 'Task Description',
+    'rows' : 5,
+    'cols' : 40,
+    }),
   'deadline': forms.DateInput(),
   'event': forms.HiddenInput(),
   'person': forms.Select(

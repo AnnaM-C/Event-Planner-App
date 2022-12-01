@@ -28,16 +28,19 @@ class HomeTests(TestCase):
         register1 = RegisteredEvent.objects.create(event=e1, member=user1)
         register1.save()
 
-    # View test if user is not logged loads the <button id="register-button-no_login" element
+    # Test home views and register model
+
+    # User is not logged in loads the <button id="register-button-no_login" element
     # and does not load the <button id="register-button-login" element
-    def test_no_login_home_view_page(self):
+    def test_no_login_home_events_view_page(self):
         response = self.client.get(reverse('home'))
         self.assertContains(response, '<button id="register-button-no_login"', status_code=200)
         self.assertNotContains(response, '<button id="register-button-login"', status_code=200)
 
+    
     # View test is false if user is not logged the view does not load the <button id="register-button-no_login" element
     # and does load the <button id="register-button-login" element
-    def test_login_home_view(self):
+    def test_login_home_events_view(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
         response = self.client.get(reverse('home'))
         self.assertNotContains(response, '<button id="register-button-no_login"', status_code=200)
@@ -74,12 +77,21 @@ class HomeTests(TestCase):
         self.assertEqual(db_count+1, RegisteredEvent.objects.count())
 
 
-    ## Test for viewing only published events on homepage
-    # def test_view_of_published_event(self):
-    #     event1 = Event.objects.get(pk=1)
-    #     data={
-    #         'event':event1
-    #     }
-    #     response = self.client.get(reverse('home'),data=data)
-    #     print(response)
+    ## View only published events on homepage
+    def test_view_of_published_event(self):
+        event1 = Event.objects.get(pk=1)
+        data={
+            'event':event1
+        }
+        response = self.client.get(reverse('home'),data=data)
+        self.assertContains(response, event1.title, status_code=200)
+
+    ## Unpublished events not viewable on homepage
+    def test_view_of_unpublished_event(self):
+            event1 = Event.objects.get(pk=3)
+            data={
+                'event':event1
+            }
+            response = self.client.get(reverse('home'),data=data)
+            self.assertNotContains(response, event1.title, status_code=200)
 

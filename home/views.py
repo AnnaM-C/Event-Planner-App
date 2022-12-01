@@ -47,8 +47,6 @@ class RegisterEvents(View):
             # registerd
             if(e_id == str(db_e_id) and u_id == str(db_u_id)):
                 flag = True
-                print(event3)
-                print(user3)
 
         if(flag==True):
             return JsonResponse({'register_success': False}, status=200)

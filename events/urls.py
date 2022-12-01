@@ -22,6 +22,7 @@ urlpatterns = [
     #events/delete/id
     path('delete/<int:nid>', views.events_delete_view, name='events_delete'),
 
+    path('publish', views.PublishEvent.as_view(), name='publish_ajax_event'),
     #events/id/tasks/ view.tasklistView
     path('<int:nid>/tasks', views.TaskListView.as_view(), name='task_list'),
 
@@ -35,8 +36,8 @@ urlpatterns = [
     path('deletetask', views.DeleteTaskView.as_view(), name='delete_task'),
 
     path('edittask', views.EditTaskView.as_view(), name='task_ajax_update'),
-    #tasks edit
+    # tasks edit
     # path('edit/<int:nid>/task/<int:nid>', views.task_update_view, name='tasks_update'),
-    path('publish', views.PublishEvent.as_view(), name='publish_ajax_event')
+
 
 ]

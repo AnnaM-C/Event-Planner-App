@@ -17,7 +17,8 @@ from django.utils import timezone
 def is_admin(user):
     return user.groups.filter(name='EventsAdminUsers').exists()
 
-# Events Views
+#----------- EVENTS VIEW -----------#
+
 @login_required
 def events_index_view(request):
     context = {}
@@ -33,7 +34,7 @@ def events_index_view(request):
         context["events_future"] = Event.objects.filter(author=request.user, date__gt = timezone.now()+timedelta(days=7))
     return render(request, 'events/index.html', context)
 
-
+#  view past events
 @login_required
 def index_past_events(request):
     context = {}
@@ -43,6 +44,7 @@ def index_past_events(request):
         context["events_list"] = Event.objects.filter(date__lt = timezone.now(), author=request.user)
     return render(request, 'events/events_view.html', context)
 
+#  view events next week
 @login_required
 def index_nextweek_events(request):
     context = {}
@@ -54,6 +56,7 @@ def index_nextweek_events(request):
         context['today'] = timezone.now()
     return render(request, 'events/events_view.html', context)
 
+#  view events > a week from today
 @login_required
 def index_future_events(request):
     context = {}
@@ -84,12 +87,10 @@ class EventDetailView(LoginRequiredMixin, DetailView):
 def events_create_view(request):
     context = {}
     form = EventForm(request.POST or None, initial={'author':request.user})
-    print(request.POST)
     if(request.method == 'POST'):
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, 'Event Created')
-            print(request)
             return redirect('events_index')
         else:
             messages.add_message(request, messages.ERROR, 'Invalid Form Data; Event not created')
@@ -129,30 +130,19 @@ def events_delete_view(request, nid):
     messages.add_message(request, messages.SUCCESS, 'Event Deleted') # after deleting redirect to index view
     return redirect('events_index')
 
-# Task Views
+# publish
+class PublishEvent(LoginRequiredMixin, View):
+ def get(self, request):
+  eid = request.GET.get('event_id')
+  event = get_object_or_404(Event, pk=eid)
+  event.publish = not(event.publish)
+  event.save()
 
-# def task_detail_view(request):
-#     people = {}
-#     people['person_list'] = Person.objects.all()
-#     return render(request, 'tasks/detail_view.html', people)
+  return JsonResponse({'publish': event.publish, 'eid': eid}, status=200)
 
-# update
-# def task_update_view(request, nid):
-#     context ={}
-#     # fetch the object related to passed id
-#     obj = get_object_or_404(Event, id = nid)
-#     # pass the object as instance in form
-#     form = TaskForm(request.POST or None, instance = obj)
-#     # save the data from the form and
-#     # redirect to detail_view
-#     if form.is_valid():
-#         form.save()
-#         messages.add_message(request, messages.SUCCESS, 'Task Updated')
-#         return redirect('tasks_detail', nid)
-#     # add form dictionary to context
-#     context["form"] = form
-#     return render(request, "events/update_view.html", context)
+#-----------TASK VIEWS-----------#
 
+# view
 class TaskListView(LoginRequiredMixin, ListView):
  model = Task
  template_name = 'events/task_list.html'
@@ -167,16 +157,17 @@ class TaskListView(LoginRequiredMixin, ListView):
 #     context['task_list'] = tasks
 #     return render(request, 'events/task_list.html', context)
 
+# create
 class CreateTaskView(LoginRequiredMixin, CreateView):
  model = Task
  form_class = TaskForm
  template_name = "events/create_view.html"
-
- def get_initial(self): # set the initial value of our event field
+ def get_initial(self): 
+  # set the initial value of our event field
   event = Event.objects.get(id=self.kwargs['nid'])
   return {'event': event}
-
- def get_success_url(self): # redirect to the event detail view on success
+ def get_success_url(self): 
+  # redirect to the event detail view on success
   return reverse_lazy('events_detail', kwargs={'pk':self.kwargs['nid']})
 
 # def task_create_view(request):
@@ -193,16 +184,16 @@ class CreateTaskView(LoginRequiredMixin, CreateView):
 #     context['form']= form
 #     return render(request, "events/create_view.html", context)
 
+# complete
 class CompleteTaskView(LoginRequiredMixin, View):
  def get(self, request):
   tid = request.GET.get('task_id')
   task = get_object_or_404(Task, pk=tid)
-
   task.complete = not(task.complete)
   task.save()
-
   return JsonResponse({'complete': task.complete, 'tid': tid}, status=200)
 
+# delete
 class DeleteTaskView(LoginRequiredMixin, View):
  def get(self, request):
   tid = request.GET.get('task_id')
@@ -213,6 +204,7 @@ class DeleteTaskView(LoginRequiredMixin, View):
   task.delete()
   return JsonResponse({'delete_success': True, 'tid': tid}, status=200)
 
+# edit
 class EditTaskView(LoginRequiredMixin, View):
      def post(self, request):
         obj = Task.objects.filter(id = request.POST.get('taskId'))
@@ -247,12 +239,3 @@ class EditTaskView(LoginRequiredMixin, View):
         # }
         # return JsonResponse(data)
 
-class PublishEvent(LoginRequiredMixin, View):
- def get(self, request):
-  eid = request.GET.get('event_id')
-  event = get_object_or_404(Event, pk=eid)
-
-  event.publish = not(event.publish)
-  event.save()
-
-  return JsonResponse({'publish': event.publish, 'eid': eid}, status=200)
