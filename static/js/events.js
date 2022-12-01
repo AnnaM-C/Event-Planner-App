@@ -147,7 +147,7 @@ async function register(event_id, user_id) {
                 if (response.register_success == false) { 
                     alert("You are already registered.");
                 }
-            }
+            } 
         });
 }
     

@@ -9,7 +9,7 @@
 <h1>This is My Home Page</h1>
 <p>Rendering template /home/home.html</p>
 {% for event in events_list %}
-
+{% if event.publish %}
 {% comment %} <form id="registerEvent" method="POST">
     {% csrf_token %} {% endcomment %}
     <div class="card" style="width: 18rem;">
@@ -20,10 +20,14 @@
         <h5 class="card-title">{{ event.description | truncatechars:20}}</h5>
         <h5 class="card-title">{{ event.id}}</h5>
         <p class="list-group list-group-flush">{{ event.date }}</p>
-        <button onClick='register({{event.id}}, {{user.id}});'>Register</button>
+        {% if user.id == default_if_none %}
+            <button id="register-button-no_login" onclick="location.href='{% url 'login'%}';">Register</button>
+        {% else %}
+            <button id="register-button-login" onClick='register({{event.id}}, {{user.id}});'>Register</button>
+        {% endif %}
     </div>
 </form>
-
+{% endif %}
 {% endfor %}
 
 {% endblock content %}

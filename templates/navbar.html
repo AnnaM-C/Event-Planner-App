@@ -18,9 +18,6 @@
         <li class="nav-item">
           <a class="nav-link active" href="{% url 'events_index' %}">My Events</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="">Calendar</a>
-          </li>
       </ul>
       {% if user.is_authenticated %}
       <li> <a href="">{{user.username}}</a> </li>

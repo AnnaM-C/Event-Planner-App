@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'contact.apps.ContactConfig',
     'tasks.apps.TasksConfig',
     'sass_processor',
-    'agenda.apps.AgendaConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
