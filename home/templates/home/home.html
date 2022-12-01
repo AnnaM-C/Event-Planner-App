@@ -14,8 +14,8 @@
     {% csrf_token %} {% endcomment %}
     <div class="card" style="width: 18rem;">
         {% comment %} <img src="{% static "images/beach1.jpg" %}" class="card-img-top" alt="..."> {% endcomment %}
-        <input class="form-control" id="event-id" type="hidden" value ="{{event}}", name="event"/>
-        <input class="form-control" id="user-id" type="hidden" value ="{{user}}", name="user"/>
+        {% comment %} <input class="form-control" id="event-id" type="hidden" value ="{{event}}", name="event"/>
+        <input class="form-control" id="user-id" type="hidden" value ="{{user}}", name="user"/> {% endcomment %}
         <h5 class="card-title">{{ event.title | truncatechars:20}}</h5>
         <h5 class="card-title">{{ event.description | truncatechars:20}}</h5>
         <h5 class="card-title">{{ event.id}}</h5>

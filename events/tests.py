@@ -107,7 +107,7 @@ class EventsTests(TestCase):
         response = self.client.delete(reverse('events_delete', kwargs={'nid': event1.pk}))
         self.assertEqual(Event.objects.count(), db_count)
 
-## Test - event title can be edited in form
+## Test - allow logged in user to edited the form
     def test_update_event_form(self):
         user1=User.objects.get(pk=1)
         login = self.client.login(username='annacarter', password='MyPassword123') 

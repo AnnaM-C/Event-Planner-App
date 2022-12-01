@@ -132,7 +132,8 @@ async function setPublish(event_id) {
 async function register(event_id, user_id) {
         $.ajax({
             // url: '{% "task_ajax_update" %}',
-            url: '/home/register',
+            // url: '{% url "register_event" %}',
+            url: 'home/register',
             type: 'get',
             data: {
                 event_id: event_id,
@@ -142,8 +143,11 @@ async function register(event_id, user_id) {
             success: function (response) {
                 if (response.register_success == true) {
                     alert("Updated.");
+                } 
+                if (response.register_success == false) { 
+                    alert("You are already registered.");
                 }
             }
-        })
+        });
 }
     
