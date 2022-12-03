@@ -40,10 +40,7 @@ class EventsTests(TestCase):
 
 #----------- EVENT TESTS for forms, views, models and authentication -----------#
 
-## Test - Login user
-    def test_login(self):
-        login = self.client.login(username='annacarter', password='MyPassword123') 
-        self.assertTrue(login)
+
 
 ## Test - Save an event to database
     def test_save_event(self):
@@ -120,6 +117,7 @@ class EventsTests(TestCase):
         self.assertEqual(Event.objects.count(), db_count)
         self.assertEqual(response.status_code, 302)
 
+## Test - create event when logged in
     def test_post_create_event_with_login(self):
         db_count = Event.objects.all().count()
         user1=User.objects.get(pk=1)
@@ -289,6 +287,42 @@ class EventsTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Task.objects.count(), db_count+1)
 
+## Test - task deadline date cannot be before todays date
+    def test_post_create_task_deadline_before_today(self):
+        db_count = Event.objects.all().count()
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        event = Event.objects.get(pk=1) 
+        person = Person.objects.get(pk=1)
+        data={
+            "title": "Task title",
+            "description": "new description",
+            "complete": True,
+            "deadline": "2019-11-26",
+            "event": event.pk, 
+            "person": person.pk,
+        }
+        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Task.objects.count(), db_count)
+
+## Test - task deadline cannot be set after event date
+    def test_post_create_task_deadline_after_event_date(self):
+        db_count = Event.objects.all().count()
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        event = Event.objects.get(pk=1) 
+        person = Person.objects.get(pk=1)
+        data={
+            "title": "Task title",
+            "description": "new description",
+            "complete": True,
+            "deadline": "2023-11-26",
+            "event": event.pk, 
+            "person": person.pk,
+        }
+        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Task.objects.count(), db_count)
+
 ## Test - task deleted object if user is logged in. Test view, check the delete_success response is true
     def test_delete_task_logged_in(self):
         db_count = Task.objects.all().count()
@@ -368,4 +402,5 @@ class EventsTests(TestCase):
         new_task.refresh_from_db()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(new_task.title, "New_Title")
+
 

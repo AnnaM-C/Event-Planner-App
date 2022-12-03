@@ -2,6 +2,7 @@ from django.test import TestCase
 from events.models import Event, Task, User, RegisteredEvent
 from django.urls import reverse
 from datetime import date
+from .forms import UserCreationWithEmailForm
 import json
 
 # Create your tests here.
@@ -28,25 +29,116 @@ class HomeTests(TestCase):
         register1 = RegisteredEvent.objects.create(event=e1, member=user1)
         register1.save()
 
-    # Test home views and register model
 
-    # User is not logged in loads the <button id="register-button-no_login" element
-    # and does not load the <button id="register-button-login" element
+#----------- Login and Log out Views -----------#
+
+## Test - Login user
+    def test_login(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        self.assertTrue(login)
+
+## Test - Log out user
+    def test_logout(self):
+        self.client.login(username='annacarter', password='MyPassword123') 
+        log_out = self.client.logout
+        # log_out = self.client.logout(username='annacarter', password='MyPassword123') 
+        self.assertTrue(log_out)
+
+# User is not logged in loads the <button id="register-button-no_login" element
+# and does not load the <button id="register-button-login" element
     def test_no_login_home_events_view_page(self):
         response = self.client.get(reverse('home'))
         self.assertContains(response, '<button id="register-button-no_login"', status_code=200)
         self.assertNotContains(response, '<button id="register-button-login"', status_code=200)
 
     
-    # View test is false if user is not logged the view does not load the <button id="register-button-no_login" element
-    # and does load the <button id="register-button-login" element
+# View test is false if user is not logged the view does not load the <button id="register-button-no_login" element
+# and does load the <button id="register-button-login" element
     def test_login_home_events_view(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
         response = self.client.get(reverse('home'))
         self.assertNotContains(response, '<button id="register-button-no_login"', status_code=200)
         self.assertContains(response, '<button id="register-button-login"', status_code=200)
 
-    def test_already_registered_alert(self):
+
+#----------- Testing sign up to use application -----------#
+
+# Test register form and view with valid inputs
+    def test_register_form_valid_inputs(self):
+        data = {
+            "username":"testuser2",
+            "email": "test@gmail.com",
+            "password1": "terminal123",
+            "password2": "terminal123",
+        }
+        form = UserCreationWithEmailForm(data)
+        self.assertTrue(form.is_valid())
+
+
+# Test register form and view with different passwords
+    def test_register_form_invalid_inputs(self):
+        data = {
+            "username":"testuser2",
+            "email": "test@gmail.com",
+            "password1": "terminal123",
+            "password2": "terminal111",
+        }
+        form = UserCreationWithEmailForm(data)
+        self.assertFalse(form.is_valid())
+
+# # Test register form and view with different passwords
+#     def test_register_form_valid_inputs(self):
+#         data = {
+#             "username":"testuser2",
+#             "email": "test@gmail.com",
+#             "password1": "terminal123",
+#             "password2": "terminal111",
+#         }
+#         form = UserCreationWithEmailForm(data)
+#         self.assertFalse(form.is_valid())
+#         self.assertContains
+
+# Test valid redirect view with valid input
+    def test_register_view_valid_inputs(self):
+        data = {
+            "username":"testuser2",
+            "email": "test@gmail.com",
+            "password1": "terminal123",
+            "password2": "terminal123",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertRedirects(response, '/accounts/login/')
+
+
+# Test view with invalid password 2 input
+    def test_register_view_valid_inputs(self):
+        data = {
+            "username":"testuser2",
+            "email": "test@gmail.com",
+            "password1": "terminal123",
+            "password2": "terminal111",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
+
+# Test view with username existing already
+    def test_register_view_duplicate_usernames(self):
+        data = {
+            "username":"annacarter",
+            "email": "ac@gmail.com",
+            "password1": "terminal123",
+            "password2": "terminal123",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
+
+
+#----------- Testing register for an event -----------#
+
+    def test_already_registered_alert_box(self):
         login = self.client.login(username='annacarter', password='MyPassword123')
         user1=User.objects.get(pk=1)
         event1=Event.objects.get(pk=1)
@@ -61,7 +153,7 @@ class HomeTests(TestCase):
         self.assertEqual(data['register_success'], False)
         self.assertEqual(db_count, RegisteredEvent.objects.count())
 
-    def test_not_registered_alert(self):
+    def test_not_registered_alert_box(self):
         login = self.client.login(username='annacarter', password='MyPassword123')
         db_count = RegisteredEvent.objects.all().count()
         user1=User.objects.get(pk=1)

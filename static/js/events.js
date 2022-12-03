@@ -142,7 +142,7 @@ async function register(event_id, user_id) {
             dataType: 'json',
             success: function (response) {
                 if (response.register_success == true) {
-                    alert("Updated.");
+                    alert("You have been registere! Check our 'Registered Events page'");
                 } 
                 if (response.register_success == false) { 
                     alert("You are already registered.");

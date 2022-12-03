@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#">Navbar</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -16,15 +16,18 @@
           <a class="nav-link active" href="{% url 'events_registered' %}">Registered Events</a>
         </li> {% endcomment %}
         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'events_index' %}">My Events</a>
+          <a class="nav-link active" href="{% url 'events_index' %}">Manage Events</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'registered_events_index' %}">Registered Events</a>
         </li>
       </ul>
       {% if user.is_authenticated %}
-      <li> <a href="">{{user.username}}</a> </li>
-      <li> <a href="{% url 'logout' %}">Logout</a> </li>
+      <li class="nav-item"> <a href="">{{user.username}}</a> </li>
+      <li class="nav-item"> <a href="{% url 'logout' %}">Logout</a> </li>
       {% else %}
-      <li> <a href="{% url 'signup_user' %}">Signup</a> </li>
-      <li> <a href="{% url 'login' %}">Login</a> </li>
+      <li class="nav-item"> <a href="{% url 'signup_user' %}">Signup</a> </li>
+      <li class="nav-item"> <a href="{% url 'login' %}">Login</a> </li>
       {% endif%}
     </div>
   </nav>

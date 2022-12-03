@@ -1,5 +1,20 @@
-{% comment %} {% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %} <title>Events</title>
-{% endblock title%} {% block content %} {% endcomment %}
+{% block title %} <title>Event's You Are Registered To</title>
+{% endblock title%} {% block content %}
+
+{% for event in registered_events %}
+{% if event.publish %}
+<div class="card" style="width: 18rem;">
+    {% comment %} <img src="{% static "images/beach1.jpg" %}" class="card-img-top" alt="..."> {% endcomment %}
+    {% comment %} <input class="form-control" id="event-id" type="hidden" value ="{{event}}", name="event"/>
+    <input class="form-control" id="user-id" type="hidden" value ="{{user}}", name="user"/> {% endcomment %}
+    <h5 class="card-title">{{ event.title | truncatechars:20}}</h5>
+    <h5 class="card-title">{{ event.description | truncatechars:20}}</h5>
+    <h5 class="card-title">{{ event.id}}</h5>
+    <p class="list-group list-group-flush">{{ event.date }}</p>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock content %}

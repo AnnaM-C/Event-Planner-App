@@ -36,13 +36,13 @@ class RegisterEvents(View):
         flag = False
         for item in RegisteredEvent.objects.all():
             # Get the event and user for each RegisterdEvent object
-            event3 = getattr(item,'event')
-            user3 = getattr(item,'member')
+            event = getattr(item,'event')
+            user = getattr(item,'member')
             # Get the primary key attributes of event and user for each event and user object in the RegisteredEvent
             # query set of objects to check if the user wanting to register for that event has already 
             # registerd
-            db_e_id = getattr(event3, 'pk')
-            db_u_id = getattr(user3, 'pk')
+            db_e_id = getattr(event, 'pk')
+            db_u_id = getattr(user, 'pk')
             # if statement to check if the user wanting to register for that event has already 
             # registerd
             if(e_id == str(db_e_id) and u_id == str(db_u_id)):

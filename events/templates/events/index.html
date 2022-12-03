@@ -3,7 +3,6 @@
 
 {% block title %} <title>Events</title>
 {% endblock title%} {% block content %}
-<h1>This is My Events Page</h1>
 
     {% comment %} <table>
         <tr>
@@ -33,9 +32,18 @@
         </tr>
         {% endfor %}
         </table> <hr/> {% endcomment %}
-<div>
-<p>{% lorem 1 b random %}<p>
-<input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
+
+  <div class="card text-center" style="margin-bottom: 40px">
+    <div class="card-header">
+      WELCOME!
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Manage Your Events</h5>
+      <p class="card-text">Create a new event or manage the events you have already created below</p>
+      <input class="btn btn-primary" type="button" onclick="location.href='{% url 'events_new'%}';" value="New Event">
+    </div>
+  </div>
+
 
 <div class="group-of-cards row row-cols-1 row-cols-md-3 g-4">
     <div class="col">

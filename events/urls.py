@@ -10,10 +10,12 @@ urlpatterns = [
     path('<int:pk>', views.EventDetailView.as_view(), name='events_detail'),
     # events/past
     path('past', views.index_past_events, name="past_events"),
-    # events/withinaweek
+    # events/nextweek
     path('nextweek', views.index_nextweek_events, name="thisweek_events"),
-    # events/afteraweek
+    # events/future
     path('future', views.index_future_events, name="future_events"),
+    # events/registered
+    path('registered', views.index_registered_events, name="registered_events_index"),
     # events/new
     path('new', views.events_create_view, name='events_new'),
 

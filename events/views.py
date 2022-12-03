@@ -140,6 +140,30 @@ class PublishEvent(LoginRequiredMixin, View):
 
   return JsonResponse({'publish': event.publish, 'eid': eid}, status=200)
 
+@login_required
+def index_registered_events(request):
+    context = {}
+    # User
+    user = request.user
+    # Store the events the user is registered on in a list to pass into the rendering template   
+    list = []
+    for item in RegisteredEvent.objects.all():
+        # Get the event and user for each RegisterdEvent object
+        event = getattr(item,'event')
+        user = getattr(item,'member')
+        # Get the primary key attributes of event and user for each event and user object in the RegisteredEvent
+        # set of objects to check if the user is registered for that event
+        db_u_id = getattr(user, 'pk')
+
+        if(str(db_u_id) == str(user.pk)):
+            list.append(event)
+    context["registered_events"] = list
+    print(context)
+
+    return render(request, "events/registered_events.html", context)
+
+
+
 #-----------TASK VIEWS-----------#
 
 # view
@@ -209,33 +233,7 @@ class EditTaskView(LoginRequiredMixin, View):
      def post(self, request):
         obj = Task.objects.filter(id = request.POST.get('taskId'))
         obj.update(title = request.POST.get('taskTitle'),description = request.POST.get('taskDescription'))
-        # print(request.POST.get('eventId'))
         return HttpResponseRedirect('' + request.POST.get('eventId'))
-        # return reverse_lazy('events_detail', kwargs={'pk':request.POST.get('eventId')})
 
-    #  def get(self, request):
-        # eid = self.kwargs['pk']
-        # print(eid)
-        # tid = request.GET.get('id', None)
-        # ttitle = request.GET.get('title', None)
-        # tdescription = request.GET.get('description', None)
-        # # tdeadline = request.GET.get('deadline', None)
-        # # tcomplete = request.GET.get('complete', None)
-        # # tevent = request.GET.get('event', None)
-        # # tperson = request.GET.get('person', None)
 
-        # obj = Task.objects.get(id = tid)
-        # obj.title = ttitle
-        # obj.description = tdescription
-        # # obj.deadline = tdeadline
-        # # obj.complete = tcomplete
-        # # obj.event = tevent
-        # # obj.person = tperson
-        # obj.save()
-
-        # task = {'id':obj.id, 'title':obj.title, 'description':obj.description}
-        # data = {
-        #     'task': task
-        # }
-        # return JsonResponse(data)
 

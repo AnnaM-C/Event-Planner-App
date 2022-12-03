@@ -9,11 +9,11 @@ class EventForm(forms.ModelForm):
         fields = ['title', 'description', 'date', 'author']
         widgets = {
             'title': forms.TextInput(attrs={
-            'class': 'formfield',
+            'class': 'form-control',
             'placeholder': 'Event Title',
             }),
             'description': forms.Textarea(attrs={
-            'class': 'formfield',
+            'class': 'form-control',
             'placeholder': 'Event Description',
             'rows' : 25,
             'cols' : 60,
@@ -30,11 +30,11 @@ class TaskForm(forms.ModelForm):
   fields = ['title', 'description', 'deadline', 'complete', 'event', 'person']
   widgets = {
   'title': forms.TextInput(attrs={
-    'class': 'formfield',
+    'class': 'form-control',
     'placeholder': 'Task Title',
     }),
   'description': forms.Textarea(attrs={
-    'class': 'formfield',
+    'class': 'form-control',
     'placeholder': 'Task Description',
     'rows' : 5,
     'cols' : 40,
