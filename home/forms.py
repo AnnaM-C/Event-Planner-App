@@ -7,3 +7,4 @@ class UserCreationWithEmailForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email")
+        User._meta.get_field('email')._unique = True

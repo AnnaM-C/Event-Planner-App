@@ -109,6 +109,13 @@ class HomeTests(TestCase):
         # form = UserCreationWithEmailForm(data)
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertRedirects(response, '/accounts/login/')
+        self.assertNotContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>')
+        self.assertNotContains(response, '  <ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is entirely numeric.</li></ul>')
 
 
 # Test view with invalid password 2 input
@@ -133,7 +140,68 @@ class HomeTests(TestCase):
         }
         # form = UserCreationWithEmailForm(data)
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
+        self.assertContains(response, '<ul class="errorlist"><li>A user with that username already exists.</li></ul>')
+
+# Test view with email existing already
+    def test_register_view_duplicate_emails(self):
+        data = {
+            "username":"testuser2",
+            "email": "testuser@surrey.ac.uk",
+            "password1": "terminal123",
+            "password2": "terminal123",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>')
+
+# Test view with password similar to username
+    def test_register_similar_to_username_password(self):
+        data = {
+            "username":"testuser2",
+            "email": "testuser2@surrey.ac.uk",
+            "password1": "testuser2",
+            "password2": "testuser2",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>')
+
+# Test view with password too short
+    def test_register_too_short_password(self):
+        data = {
+            "username":"sam1",
+            "email": "sam1@surrey.ac.uk",
+            "password1": "dog",
+            "password2": "dog",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertContains(response, '<ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>')
+
+# Test view with password too common
+    def test_register_common_password(self):
+        data = {
+            "username":"sam1",
+            "email": "sam1@surrey.ac.uk",
+            "password1": "password",
+            "password2": "password",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
+
+# Test numeric password
+    def test_register_numeric_password(self):
+        data = {
+            "username":"sam1",
+            "email": "sam1@surrey.ac.uk",
+            "password1": "123456",
+            "password2": "123456",
+        }
+        # form = UserCreationWithEmailForm(data)
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertContains(response, '<li>This password is entirely numeric.</li>')
+
 
 
 #----------- Testing register for an event -----------#
