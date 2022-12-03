@@ -63,8 +63,9 @@ class HomeTests(TestCase):
 
 #----------- Testing sign up to use application -----------#
 
-# Test register form and view with valid inputs
+# Test register form valid with valid inputs. Model test - user was created
     def test_register_form_valid_inputs(self):
+        db_count = User.objects.all().count()
         data = {
             "username":"testuser2",
             "email": "test@gmail.com",
@@ -72,10 +73,12 @@ class HomeTests(TestCase):
             "password2": "terminal123",
         }
         form = UserCreationWithEmailForm(data)
+        form.save()
         self.assertTrue(form.is_valid())
+        self.assertTrue(db_count+1, User.objects.all().count())
 
 
-# Test register form and view with different passwords
+# Test register form and view with different passwords. Model test - user was not created
     def test_register_form_invalid_inputs(self):
         data = {
             "username":"testuser2",
@@ -85,6 +88,7 @@ class HomeTests(TestCase):
         }
         form = UserCreationWithEmailForm(data)
         self.assertFalse(form.is_valid())
+        self.assertFalse(User.objects.filter(username="testuser2").exists())
 
 # # Test register form and view with different passwords
 #     def test_register_form_valid_inputs(self):
@@ -190,7 +194,7 @@ class HomeTests(TestCase):
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
 
-# Test numeric password
+# Test view of numeric password
     def test_register_numeric_password(self):
         data = {
             "username":"sam1",
@@ -201,6 +205,8 @@ class HomeTests(TestCase):
         # form = UserCreationWithEmailForm(data)
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<li>This password is entirely numeric.</li>')
+
+# Test model, user successfull created with valid form
 
 
 
