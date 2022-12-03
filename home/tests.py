@@ -62,9 +62,13 @@ class HomeTests(TestCase):
 
 
 #----------- Testing sign up to use application -----------#
-
-# Test register form valid with valid inputs. Model test - user was created
-    def test_register_form_valid_inputs(self):
+    
+# Test sign up form with valid nput
+# Tes form is valid
+# Test no error messages are displayed on the page
+# Test page redirects to the correct place
+# Test user was successfully saved
+    def test_register_view_valid_inputs(self):
         db_count = User.objects.all().count()
         data = {
             "username":"testuser2",
@@ -77,9 +81,21 @@ class HomeTests(TestCase):
         self.assertTrue(form.is_valid())
         self.assertTrue(db_count+1, User.objects.all().count())
 
+        response = self.client.post(reverse('signup_user'), data=data, follow=True)
+        self.assertRedirects(response, '/accounts/login/')
+        self.assertNotContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is entirely numeric.</li></ul>')
 
-# Test register form and view with different passwords. Model test - user was not created
-    def test_register_form_invalid_inputs(self):
+
+# Test register form with invalid input (different passwords)
+# Test form is invalid 
+# Test user was not created
+# Test correct error message was displayed in the view
+    def test_register_view_valid_inputs(self):
         data = {
             "username":"testuser2",
             "email": "test@gmail.com",
@@ -89,52 +105,13 @@ class HomeTests(TestCase):
         form = UserCreationWithEmailForm(data)
         self.assertFalse(form.is_valid())
         self.assertFalse(User.objects.filter(username="testuser2").exists())
-
-# # Test register form and view with different passwords
-#     def test_register_form_valid_inputs(self):
-#         data = {
-#             "username":"testuser2",
-#             "email": "test@gmail.com",
-#             "password1": "terminal123",
-#             "password2": "terminal111",
-#         }
-#         form = UserCreationWithEmailForm(data)
-#         self.assertFalse(form.is_valid())
-#         self.assertContains
-
-# Test valid redirect view with valid input
-    def test_register_view_valid_inputs(self):
-        data = {
-            "username":"testuser2",
-            "email": "test@gmail.com",
-            "password1": "terminal123",
-            "password2": "terminal123",
-        }
-        # form = UserCreationWithEmailForm(data)
-        response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertRedirects(response, '/accounts/login/')
-        self.assertNotContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>')
-        self.assertNotContains(response, '  <ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>This password is entirely numeric.</li></ul>')
-
-
-# Test view with invalid password 2 input
-    def test_register_view_valid_inputs(self):
-        data = {
-            "username":"testuser2",
-            "email": "test@gmail.com",
-            "password1": "terminal123",
-            "password2": "terminal111",
-        }
-        # form = UserCreationWithEmailForm(data)
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
 
-# Test view with username existing already
+# Test register form with invalid input (duplicate username)
+# # Test form is invalid 
+# Test user was not created
+# Test correct error message was displayed in the view
     def test_register_view_duplicate_usernames(self):
         data = {
             "username":"annacarter",
@@ -142,11 +119,16 @@ class HomeTests(TestCase):
             "password1": "terminal123",
             "password2": "terminal123",
         }
-        # form = UserCreationWithEmailForm(data)
+        form = UserCreationWithEmailForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertFalse(User.objects.filter(username="testuser2").exists())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<ul class="errorlist"><li>A user with that username already exists.</li></ul>')
 
-# Test view with email existing already
+# Test register form with invalid input (duplicate email)
+# Test form is invalid 
+# Test user was not created
+# Test correct error message was displayed in the view
     def test_register_view_duplicate_emails(self):
         data = {
             "username":"testuser2",
@@ -154,11 +136,16 @@ class HomeTests(TestCase):
             "password1": "terminal123",
             "password2": "terminal123",
         }
-        # form = UserCreationWithEmailForm(data)
+        form = UserCreationWithEmailForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertFalse(User.objects.filter(username="testuser2").exists())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>')
 
-# Test view with password similar to username
+# Test register form with invalid input (password and username similar)
+# Test form is invalid 
+# Test user was not created
+# Test correct error message was displayed in the view
     def test_register_similar_to_username_password(self):
         data = {
             "username":"testuser2",
@@ -166,11 +153,16 @@ class HomeTests(TestCase):
             "password1": "testuser2",
             "password2": "testuser2",
         }
-        # form = UserCreationWithEmailForm(data)
+        form = UserCreationWithEmailForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertFalse(User.objects.filter(username="testuser2").exists())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>')
 
-# Test view with password too short
+# Test register form with invalid input (short password)
+# Test form is invalid 
+# Test user was not created
+# Test correct error message was displayed in the view
     def test_register_too_short_password(self):
         data = {
             "username":"sam1",
@@ -178,11 +170,16 @@ class HomeTests(TestCase):
             "password1": "dog",
             "password2": "dog",
         }
-        # form = UserCreationWithEmailForm(data)
+        form = UserCreationWithEmailForm(data)
+        self.assertFalse(User.objects.filter(username="testuser2").exists())
+        self.assertFalse(form.is_valid())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>')
 
-# Test view with password too common
+# Test register form with invalid input (common password)
+# Test form is invalid 
+# Test user was not created
+# Test correct error message was displayed in the view
     def test_register_common_password(self):
         data = {
             "username":"sam1",
@@ -190,11 +187,16 @@ class HomeTests(TestCase):
             "password1": "password",
             "password2": "password",
         }
-        # form = UserCreationWithEmailForm(data)
+        form = UserCreationWithEmailForm(data)
+        self.assertFalse(User.objects.filter(username="testuser2").exists())
+        self.assertFalse(form.is_valid())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
 
-# Test view of numeric password
+# Test register form with invalid input (numeric password)
+# Test form is invalid 
+# Test user was not created
+# Test correct error message was displayed in the view
     def test_register_numeric_password(self):
         data = {
             "username":"sam1",
@@ -202,11 +204,11 @@ class HomeTests(TestCase):
             "password1": "123456",
             "password2": "123456",
         }
-        # form = UserCreationWithEmailForm(data)
+        form = UserCreationWithEmailForm(data)
+        self.assertFalse(User.objects.filter(username="testuser2").exists())
+        self.assertFalse(form.is_valid())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
         self.assertContains(response, '<li>This password is entirely numeric.</li>')
-
-# Test model, user successfull created with valid form
 
 
 
