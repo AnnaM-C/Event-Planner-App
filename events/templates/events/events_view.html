@@ -1,62 +1,39 @@
 {% extends "base.html" %}
-
 {% block title %} <title>Events Page</title>
 {% endblock title%} 
 {% block content %}
 {% load static %}
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
-<h1>Events Page</h1>
-
-    <table>
-        <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Created</th>
-        <th>Updated</th>
-        <th>Date</th>
-        </tr>
-        {% comment %} {% for event in events_list %}
-        <tr> <td>
-        <a href="{% url 'events_detail' event.id %}">
-            {{ event.title | truncatechars:20}}</a>
-        </td>
-        <td>
-            {{ event.description  | truncatechars:25}}
-        </td>
-        <td>
-            {{event.created_at}}
-        </td> 
-        <td>
-            {{event.updated_at}}
-        </td>
-        <td>
-            {{event.date}}
-        </td>
-        </tr>
-        {% endfor %}
-        </table> <hr/> {% endcomment %}
-
-
-    <input type="button" onclick="location.href='{% url 'events_new'%}';" value="New">
-    <p id="published"></p>
-
+<div class="card text-center" style="margin-bottom: 40px">
+    <div class="card-header">
+      {{title}} 
+    </div>
+    <div class="card-body">
+      <p class="card-text">View events or create a new event</p>
+      <input class="btn btn-primary" type="button" onclick="location.href='{% url 'events_new'%}';" value="New Event">
+    </div>
+  </div>
+    {% comment %} <p id="published"></p> {% endcomment %}
+<div class="events-cards group-of-cards row row-cols-1 row-cols-md-3 g-4">
     {% for event in events_list %}
-    <div class="card text-center">
-        <div class="card-header">
-          Featured
+        <div class="col">
+            <div class="card text-center events-card">
+                <div class="card-header">
+                Featured
+                </div>
+                <div class="card-body">
+                <h5 class="card-title"><a href="{% url 'events_detail' event.id %}">
+                    {{ event.title}}</a></h5>
+                <p class="card-text"> {{event.description | truncatechars:20}}</p>
+                <a href="{% url 'events_detail' event.id %}" class="btn btn-primary">Tasks</a>
+                    <button id="publish-{{event.id}}" onClick='setPublish({{event.id}});' class="btn btn-primary">Publish</button>
+                </div>
+                <div class="card-footer text-muted">
+                    {{ event.date }}
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-          <h5 class="card-title"><a href="{% url 'events_detail' event.id %}">
-            {{ event.title | truncatechars:20}}</a></h5>
-          <p class="card-text"> {{event.description}}</p>
-          <a href="{% url 'events_detail' event.id %}" class="btn btn-primary">Tasks</a>
-          <button onClick='setPublish({{event.id}});' class="btn btn-primary">Publish</button>
-        </div>
-        <div class="card-footer text-muted">
-            {{ event.date }}
-            {% comment %} {{event.date}}{% now "d-m-y" %} {% endcomment %}
-        </div>
-      </div>
-      {% endfor %}
+    {% endfor %}
+</div>
 
 {% endblock content %}

@@ -21,8 +21,6 @@ h1 {
   margin-left: 20px;
   margin-bottom: 10px;
   padding: 10px;
-  width: 400px;
-  height: 50px;
   text-align: left;
   font: 400 .9em 'Arial';
   border: 1px solid #97C6E3;
@@ -41,10 +39,44 @@ h1 {
 
 .col {
   display: flex;
-  justify-content: space-around; }
+  justify-content: space-around;
+  margin-bottom: 20px; }
 
 .wrapper {
   display: flex;
   justify-content: center; }
+
+.events-card {
+  width: 900px; }
+
+.events-cards {
+  display: flex;
+  justify-content: center; }
+
+#header {
+  text-align: center;
+  width: 100vw;
+  background-color: white;
+  animation-name: header-animation;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate-reverse;
+  margin-bottom: 10px; }
+
+@keyframes header-animation {
+  from {
+    background-color: #f9efcd; }
+  to {
+    background-color: #f9afaf; } }
+
+.nav-user {
+  color: white; }
+
+.navbar-brand {
+  width: 2%; }
+
+.more-events-btn {
+  margin-top: 5px;
+  color: white; }
 
 /*# sourceMappingURL=base.css.map */

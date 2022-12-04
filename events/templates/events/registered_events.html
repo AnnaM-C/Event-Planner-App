@@ -4,17 +4,36 @@
 {% block title %} <title>Event's You Are Registered To</title>
 {% endblock title%} {% block content %}
 
-{% for event in registered_events %}
-{% if event.publish %}
-<div class="card" style="width: 18rem;">
-    {% comment %} <img src="{% static "images/beach1.jpg" %}" class="card-img-top" alt="..."> {% endcomment %}
-    {% comment %} <input class="form-control" id="event-id" type="hidden" value ="{{event}}", name="event"/>
-    <input class="form-control" id="user-id" type="hidden" value ="{{user}}", name="user"/> {% endcomment %}
-    <h5 class="card-title">{{ event.title | truncatechars:20}}</h5>
-    <h5 class="card-title">{{ event.description | truncatechars:20}}</h5>
-    <h5 class="card-title">{{ event.id}}</h5>
-    <p class="list-group list-group-flush">{{ event.date }}</p>
+<div class="card text-center" style="margin-bottom: 40px">
+    <div class="card-header">
+    </div>
+    <div class="card-body">
+    <h5 class="card-title">Your Registered Events </h5>
+      <p class="card-text">Track the events you signed up to</p>
+      <input class="btn btn-primary" type="button" onclick="location.href='{% url 'home'%}';" value="Browse More">
+    </div>
+    <img src="{% static "images/sparklers2.jpg"%}" class="card-img-bottom" alt="beach">
+  </div>
+
+
+<div class="events-cards group-of-cards row row-cols-1 row-cols-md-3 g-4">
+    {% for event in registered_events %}
+    {% if event.publish %}
+        <div class="col">
+            <div class="card text-center events-card">
+                <div class="card-header">
+                Featured
+                </div>
+                <div class="card-body">
+                <h5 class="card-title">{{ event.title}}</a></h5>
+                <p class="card-text"> {{event.description | truncatechars:20}}</p>
+                </div>
+                <div class="card-footer text-muted">
+                    {{ event.date }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% endfor %}
 </div>
-{% endif %}
-{% endfor %}
 {% endblock content %}

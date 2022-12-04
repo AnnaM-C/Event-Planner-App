@@ -1,11 +1,10 @@
 from django.test import TestCase
-from events.models import Event, Task, User, RegisteredEvent
+from events.models import Event, User, RegisteredEvent
 from django.urls import reverse
 from datetime import date
 from .forms import UserCreationWithEmailForm
 import json
 
-# Create your tests here.
 class HomeTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -63,8 +62,8 @@ class HomeTests(TestCase):
 
 #----------- Testing sign up to use application -----------#
     
-# Test sign up form with valid nput
-# Tes form is valid
+# Test sign up form with valid input
+# Test form is valid
 # Test no error messages are displayed on the page
 # Test page redirects to the correct place
 # Test user was successfully saved

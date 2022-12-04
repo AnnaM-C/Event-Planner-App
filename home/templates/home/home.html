@@ -5,29 +5,43 @@
 {% block content %}
 {% load static %}
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
-
-<h1>This is My Home Page</h1>
-<p>Rendering template /home/home.html</p>
-{% for event in events_list %}
-{% if event.publish %}
-{% comment %} <form id="registerEvent" method="POST">
-    {% csrf_token %} {% endcomment %}
-    <div class="card" style="width: 18rem;">
-        {% comment %} <img src="{% static "images/beach1.jpg" %}" class="card-img-top" alt="..."> {% endcomment %}
-        {% comment %} <input class="form-control" id="event-id" type="hidden" value ="{{event}}", name="event"/>
-        <input class="form-control" id="user-id" type="hidden" value ="{{user}}", name="user"/> {% endcomment %}
-        <h5 class="card-title">{{ event.title | truncatechars:20}}</h5>
-        <h5 class="card-title">{{ event.description | truncatechars:20}}</h5>
-        <h5 class="card-title">{{ event.id}}</h5>
-        <p class="list-group list-group-flush">{{ event.date }}</p>
-        {% if user.id == default_if_none %}
-            <button id="register-button-no_login" onclick="location.href='{% url 'login'%}';">Register</button>
-        {% else %}
-            <button id="register-button-login" onClick='register({{event.id}}, {{user.id}});'>Register</button>
-        {% endif %}
+<div class="card text-center" style="margin-bottom: 40px">
+    <div class="card-header">
+      BROWSE EVENTS
     </div>
-</form>
-{% endif %}
-{% endfor %}
+    <div class="card-body">
+      <p class="card-text">Join the fun!</p>
+    </div>
+    <img src="{% static "images/dinner2.jpg"%}" class="card-img-bottom" alt="beach">
+  </div>
 
+
+<div class="events-cards group-of-cards row row-cols-1 row-cols-md-3 g-4">
+    {% for event in events_list %}
+    {% if event.publish %}
+        <div class="col">
+            <div class="card text-center events-card">
+                <div class="card-header">
+                Featured
+                </div>
+                <div class="card-body">
+                <h5 class="card-title">{{ event.title}}</a></h5>
+                <p class="card-text"> {{event.description | truncatechars:20}}</p>
+                </div>
+                <div class="card-footer text-muted">
+                    {{ event.date }}
+                </div>
+                    {% if user.id == default_if_none %}
+                <button id="register-button-no_login" onclick="location.href='{% url 'login'%}';">Register</button>
+                    {% else %}
+                <button id="register-button-login" class="btn btn-primary" onClick='register({{event.id}}, {{user.id}});'>Register</button>
+                    {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+
+</div>
 {% endblock content %}

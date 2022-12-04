@@ -4,38 +4,8 @@
 {% block title %} <title>Events</title>
 {% endblock title%} {% block content %}
 
-    {% comment %} <table>
-        <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Created</th>
-        <th>Updated</th>
-        <th>Date</th>
-        </tr>
-        {% for event in events_list %}
-        <tr> <td>
-        <a href="{% url 'events_detail' event.id %}">
-            {{ event.title | truncatechars:20}}</a>
-        </td>
-        <td>
-            {{ event.description  | truncatechars:25}}
-        </td>
-        <td>
-            {{event.created_at}}
-        </td> 
-        <td>
-            {{event.updated_at}}
-        </td>
-        <td>
-            {{event.date}}
-        </td>
-        </tr>
-        {% endfor %}
-        </table> <hr/> {% endcomment %}
-
   <div class="card text-center" style="margin-bottom: 40px">
     <div class="card-header">
-      WELCOME!
     </div>
     <div class="card-body">
       <h5 class="card-title">Manage Your Events</h5>
@@ -58,7 +28,7 @@
             <li class="list-group-item">{{ events_past.0 }}</li>
             {% endif %}
           </ul>
-          <a onclick="location.href='{% url 'past_events'%}';" href="#" class="btn btn-primary">More Events</a>
+          <a onclick="location.href='{% url 'past_events'%}';" href="#" class="btn btn-primary more-events-btn">More Events</a>
         </div>
     </div>
     </div>
@@ -74,13 +44,13 @@
             <li class="list-group-item">{{ events_week.0 }}</li>
             {% endif %}
           </ul>
-          <a onclick="location.href='{% url 'thisweek_events'%}';" href="#" class="btn btn-primary">More Events</a>
+          <a onclick="location.href='{% url 'thisweek_events'%}';" href="#" class="btn btn-primary more-events-btn">More Events</a>
         </div>
     </div>
     </div>
     <div class="col">
     <div class="card" style="width: 18rem;">
-        <img src="{% static "images/country1.jpg" %}" class="card-img-top" alt="...">
+        <img src="{% static "images/road.jpg" %}" class="card-img-top" alt="...">
         <div class="card-body">
           <h5 class="card-title">Events > Week Away</h5>
           <ul class="list-group list-group-flush">
@@ -90,7 +60,7 @@
             <li class="list-group-item">{{ events_future.0 }}</li>
             {% endif %}
           </ul>
-          <a onclick="location.href='{% url 'future_events'%}';" href="#" class="btn btn-primary">More Events</a>
+          <a onclick="location.href='{% url 'future_events'%}';" href="#" class="btn btn-primary more-events-btn">More Events</a>
         </div>
     </div>
 </div>

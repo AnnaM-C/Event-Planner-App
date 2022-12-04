@@ -42,6 +42,7 @@ def index_past_events(request):
         context["events_list"] = Event.objects.filter(date__lt = timezone.now())
     else:
         context["events_list"] = Event.objects.filter(date__lt = timezone.now(), author=request.user)
+        context["title"] = "PAST EVENTS"
     return render(request, 'events/events_view.html', context)
 
 #  view events next week
@@ -54,6 +55,7 @@ def index_nextweek_events(request):
     else:
         context["events_list"] = Event.objects.filter(date__range = [timezone.now(), timezone.now()+timedelta(days=7)], author=request.user)
         context['today'] = timezone.now()
+    context["title"] = "EVENTS NEXT WEEK"
     return render(request, 'events/events_view.html', context)
 
 #  view events > a week from today
@@ -66,6 +68,7 @@ def index_future_events(request):
     else:
         context["events_list"] = Event.objects.filter(date__gt = timezone.now()+timedelta(days=7), author=request.user)
         context['today'] = timezone.now()
+    context["title"] = "EVENTS IN OVER A WEEK"
     return render(request, 'events/events_view.html', context)
 
 # view
@@ -140,11 +143,12 @@ class PublishEvent(LoginRequiredMixin, View):
 
   return JsonResponse({'publish': event.publish, 'eid': eid}, status=200)
 
+# registered to events
 @login_required
 def index_registered_events(request):
     context = {}
     # User
-    user = request.user
+    user1 = request.user
     # Store the events the user is registered on in a list to pass into the rendering template   
     list = []
     for item in RegisteredEvent.objects.all():
@@ -153,12 +157,11 @@ def index_registered_events(request):
         user = getattr(item,'member')
         # Get the primary key attributes of event and user for each event and user object in the RegisteredEvent
         # set of objects to check if the user is registered for that event
-        db_u_id = getattr(user, 'pk')
-
-        if(str(db_u_id) == str(user.pk)):
+        db_u_id = getattr(user, 'id')
+        if(str(db_u_id) == str(user1.id)):
             list.append(event)
+    
     context["registered_events"] = list
-    print(context)
 
     return render(request, "events/registered_events.html", context)
 

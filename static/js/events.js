@@ -101,33 +101,16 @@ async function setPublish(event_id) {
         success: function(response) {
             if(response.publish == true)
             {
-               $("#published").html("Published");
+               $("#publish-"+event_id).html("Unpublish");
             }
             else
             {
-                $("#published").html("Not published");
+                $("#publish-"+event_id).html("Publish");
             }
         }
     });
 }
 
-// async function register(event, user) {
-//     $.ajax({
-//         url: 'home/register',
-//         type: 'post',
-//         data: {
-//             event: event,
-//             user: user,
-//         },
-//         success: function(response) {
-//             // Display message registered
-//             if(response) {
-//                 alert("All fields must have a valid value.");
-//             }
-//     }
-
-//     });
-// }
 
 async function register(event_id, user_id) {
         $.ajax({
@@ -142,7 +125,7 @@ async function register(event_id, user_id) {
             dataType: 'json',
             success: function (response) {
                 if (response.register_success == true) {
-                    alert("You have been registere! Check our 'Registered Events page'");
+                    alert("You have been registered! Check our 'Registered Events page'");
                 } 
                 if (response.register_success == false) { 
                     alert("You are already registered.");

@@ -3,21 +3,29 @@
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
 
 <h3>Tasks</h3>
+<table id="taskTable" class="table table-striped">
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Deadline</th>
+        <th>Assigned to</th>
+    </tr>
 {% for task in task_list %}
 {% if task.complete %}
- <div class="task_prompt complete" id="task-{{task.id}}" onClick='togglecomplete({{ task.id }})'>
-    <div class="taskTitle taskData" name="title">{{task.title}}</div>
-    <div class="taskDescription taskData" name="description">{{task.description}}</div>
-    <div class="taskDeadline taskData" name="deadline">{{task.deadline}}</div>
-    <div class="taskPerson taskData" name="person">{{task.person.name}}</div>
+        <tr class="task_prompt complete" id="task-{{task.id}}" onClick='togglecomplete({{ task.id }})'>
+            <td class="taskTitle taskData" name="title">{{task.title}}</td>
+            <td class="taskDescription taskData" name="description">{{task.description}}</td>
+            <td class="taskDeadline taskData" name="deadline">{{task.deadline}}</td>
+            <td class="taskPerson taskData" name="person">{{task.person.name}}</td>   
 {% else %}
- <div class="task_prompt incomplete" id="task-{{task.id}}" onClick='togglecomplete({{ task.id }})'>
-    <div class="taskTitle taskData" name="title">{{task.title}}</div>
-    <div class="taskDescription taskData" name="description">{{task.description}}</div>
-    <div class="taskDeadline taskData" name="deadline">{{task.deadline}}</div>
-    <div class="taskPerson taskData" name="person">{{task.person.name}}</div>
+        <tr class="task_prompt incomplete" id="task-{{task.id}}" onClick='togglecomplete({{ task.id }})'>
+            <td class="taskTitle taskData" name="title">{{task.title}}</td>
+            <td class="taskDescription taskData" name="description">{{task.description}}</td>
+            <td class="taskDeadline taskData" name="deadline">{{task.deadline}}</td>
+            <td class="taskPerson taskData" name="person">{{task.person.name}}</td>
 {% endif %}
- </div>
+        </tr>
+</table>
 <button class="task_button" onClick='event.stopPropagation();delete_t({{ task.id }});' type='button'>X</button>
 <button class="task_edit_button" onClick='editTask({{ task.id }}, {{ nid }});' data-toggle="modal" data-target="#myModal" type='button'>Edit</button>
 

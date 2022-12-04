@@ -4,9 +4,9 @@
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
 
 <h2>{{ event.title }}</h2><hr>
-<p> {{ event.description }}</p><hr>
-<p> Created:{{ event.created_at }}</p>
-<p> Last Updated: {{ event.updated_at }}</p>
+<p> {{ event.description }}</p>
+<hr>
+<p>Date: {{event.date}}<p>
 <hr/>
 <input type="button" onclick="location.href='{% url 'events_update' event.id %}';" value="Edit" />
 <input type="button" onclick="location.href='{% url 'events_delete' event.id %}';" value="Delete" />
