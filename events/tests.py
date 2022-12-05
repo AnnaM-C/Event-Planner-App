@@ -4,106 +4,52 @@ from datetime import datetime, date
 from django.db import transaction, IntegrityError
 from django.urls import reverse
 from .forms import *
-
+from django.core.exceptions import ValidationError
 
 class EventsTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-
         # User objects for testing
         user1 = User(username='annacarter', email='anna@surrey.ac.uk') 
         user1.set_password('MyPassword123')
+        user1.full_clean
         user1.save()
         user2 = User(username='testadminuser', email='testadminuser@surrey.ac.uk') 
         user2.set_password('MyPassword123')
+        user2.full_clean
         user2.save()
         user3 = User(username='testuser', email='testuser@surrey.ac.uk') 
-        user2.set_password('MyPassword123')
+        user3.set_password('MyPassword123')
+        user3.full_clean
         user3.save()
 
         # Event objects for testing
-        e1 = Event(title='Rugby Party', description="Location tbc", date = date.today(), publish = False, author=user1) 
+        e1 = Event(title='Rugby Party', description="Location tbc", date = "2024-11-21", publish = False, author=user1) 
+        e1.full_clean
         e1.save()
-        e2 = Event(title='Alfies 1st Birthday', description="Location tbc", author=user1) 
+        e2 = Event(title='Alfies 1st Birthday', description="Location tbc", date = "2024-11-21", publish = False, author=user1) 
+        e2.full_clean
         e2.save()
 
         # Person object for testing
         p1 = Person(name="Tony")
+        p1.full_clean
         p1.save()
 
         # Task object for testing
-        t1 = Task(title='Title task', description='task description', complete=True, deadline=date.today(), event=e1, person=p1)
+        t1 = Task(title='Title task', description='task description', complete=True, deadline="2024-11-10", event=e1, person=p1)
+        t1.full_clean
         t1.save()
-        t2 = Task(title='Second task title', description='description 2', complete=False, deadline=date.today(), event=e1, person=p1)
+        t2 = Task(title='Second task title', description='description 2', complete=False, deadline="2024-11-10", event=e1, person=p1)
+        t2.full_clean
         t2.save()
 
 
-#----------- EVENT TESTS for forms, views, models and authentication -----------#
+#----------- EVENT TESTS -----------#
 
+#----------- EVENTS PROTECTED URLS -----------#
 
-
-## Test - Save an event to database
-    def test_save_event(self):
-        db_count = Event.objects.all().count() 
-        user1=User.objects.get(pk=1)
-        event = Event(title='Christmas Brunch', description='At the ned', author=user1) 
-        event.save()
-        self.assertEqual(db_count+1, Event.objects.all().count())
-
-## Test - successfully save event form for non-empty title, description and deadline 
-    def test_post_create_event(self): 
-        data = {
-            "title": "new task",
-            "description": "new description",
-            "date": date.today(),
-        }
-        form = EventForm(data) 
-        self.assertTrue(form.is_valid())
-
-## Test - empty event title cannot be saved
-    def test_post_create_task_no_title(self):     
-        data = {
-            "title": "",
-            "description": "new task",
-            "date": date.today(),
-        }
-        form = EventForm(data) 
-        self.assertFalse(form.is_valid())
-
-## Test - empty event description cannot be saved
-    def test_post_create_task_no_description(self):     
-        data = {
-            "title": "new task",
-            "description": "",
-            "date": date.today(),
-        }
-        form = EventForm(data) 
-        self.assertFalse(form.is_valid())
-
-## Test - empty event date cannot be saved
-    def test_post_create_task_no_date(self):     
-        data = {
-            "title": "new task",
-            "description": "new description",
-            "date": None,
-        }
-        form = EventForm(data) 
-        self.assertFalse(form.is_valid())
-
-## Test - duplicate event title (event titles are unique)
-    def test_duplicate_title(self):
-        db_count = Event.objects.all().count()
-        user1=User.objects.get(pk=1)
-        event = Event(title='Rugby Party', description="Social event", author=user1) 
-        #with self.assertRaises(IntegrityError):
-        try:
-            with transaction.atomic(): 
-                event.save()
-        except IntegrityError: 
-            pass
-        self.assertNotEqual(db_count+1, Event.objects.all().count())
-
-## Test - protected URL's
+## Test - cannot create event when not logged in
     def test_post_create_event_no_login(self): 
         db_count = Event.objects.all().count() 
         user1=User.objects.get(pk=1)
@@ -111,13 +57,14 @@ class EventsTests(TestCase):
             "title": "new Event", 
             "description": " new description", 
             "date": date.today(),
+            "publish": False,
             "author": user1
         }
         response = self.client.post(reverse('events_new'), data=data) 
         self.assertEqual(Event.objects.count(), db_count)
         self.assertEqual(response.status_code, 302)
 
-## Test - create event when logged in
+## Test - can create event when logged in
     def test_post_create_event_with_login(self):
         db_count = Event.objects.all().count()
         user1=User.objects.get(pk=1)
@@ -125,11 +72,186 @@ class EventsTests(TestCase):
         data={
             "title": "new event", 
             "description": " new description",
-            "date": date.today(), 
+            "date": date.today(),
+            "publish": True, 
             "author": user1.pk
         }
         response = self.client.post(reverse('events_new'), data=data) 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(Event.objects.count(), db_count+1)
+
+#----------- EVENTS MODELS -----------#
+
+## Test - Save an event with valid inputs to database
+    def test_event_save_event(self):
+        db_count = Event.objects.all().count() 
+        user1=User.objects.get(pk=1)
+        event = Event(title='Christmas Brunch', description='At the ned', date='2024-11-26', publish=False, author=user1) 
+        event.save()
+        self.assertEqual(db_count+1, Event.objects.all().count())
+        self.assertTrue(event.clean)
+
+## Test - cannot save duplicate event title (event titles are unique)
+    def test_event_model_duplicate_title(self):
+        db_count = Event.objects.all().count()
+        user1=User.objects.get(pk=1)
+        event = Event(title='Rugby Party', description="Social event", date='2024-11-26', publish=False, author=user1) 
+        #with self.assertRaises(IntegrityError):
+        try:
+            with transaction.atomic(): 
+                event.save()
+        except IntegrityError: 
+            pass
+        self.assertEqual(db_count, Event.objects.all().count())
+        self.assertRaises(ValidationError, event.full_clean)
+
+# Test - cannot save title greater than 128 characters (event titles have max-length 128)
+    def test_event_model_title_max_length(self):
+        user1=User.objects.get(pk=1)
+        event = Event(title='Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds.', description='At the ned', date='2024-11-26', publish=False, author=user1) 
+        self.assertRaises(ValidationError, event.full_clean)      
+
+
+## Test - cannot save empty event title (event titles are required)
+    def test_event_model_title_required(self):
+        user1=User.objects.get(pk=1)
+        event = Event(description="Social event", date='2024-11-26', publish=False, author=user1) 
+        self.assertRaises(ValidationError, event.full_clean)
+
+
+## Test - cannot save empty event description (event descriptions are required)
+    def test_event_model_description_required(self):
+        user1=User.objects.get(pk=1)
+        event = Event(title="Pottery Class", date='2024-11-26', publish=False, author=user1) 
+        self.assertRaises(ValidationError, event.full_clean)
+
+## Test - cannot save empty event date (event dates are required)
+    def test_event_model_date_required(self):
+        user1=User.objects.get(pk=1)
+        event = Event(title="Pottery Class", description="Social event", date="", publish=False, author=user1) 
+        self.assertRaises(ValidationError, event.full_clean)
+
+## Test - cannot save date before todays date (event dates are to be set in the future)
+    def test_event_model_date_less_than_today(self):
+        user1=User.objects.get(pk=1)
+        event = Event(title="Pottery Class", description="Social event", date='2021-11-26', publish=False, author=user1) 
+        self.assertRaises(ValidationError, event.full_clean)
+
+## Test - cannot save publish field as null (publish field is either True or False)
+    def test_event_model_test_publish_not_null(self):
+        user1=User.objects.get(pk=1)
+        event = Event(title="Pottery Class", description="Social event", date='2024-11-26', publish="Null", author=user1) 
+        self.assertRaises(ValidationError, event.full_clean)
+
+## Test - can save empty publish field (publish field is false by default)
+    def test_event_model_test_publish_not_required(self):
+        user1=User.objects.get(pk=1)
+        event = Event(title="Pottery Class", description="Social event", date='2024-11-26', author=user1) 
+        self.assertTrue(event.full_clean)
+
+## TODO - complete author tests
+
+#----------- EVENT FORM -----------#
+
+## Test - successfully save event form for non-empty title, description, date, publish and autor 
+    def test_post_create_event(self): 
+        db_count = Event.objects.all().count()   
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        user1=User.objects.get(pk=1)
+        data = {
+            "title": "new task",
+            "description": "new description",
+            "date": date.today(),
+            "publish": False,
+            "author": user1.pk
+        }
+        form = EventForm(data) 
+        self.assertTrue(form.is_valid())
+        response = self.client.post(reverse('events_new'), data=data) 
+        self.assertEqual(Event.objects.count(), db_count+1)
+
+## Test - empty event title cannot be saved
+    def test_post_not_create_event_no_title(self):   
+        db_count = Event.objects.all().count()   
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        user1=User.objects.get(pk=1)
+        data = {
+            "title": "",
+            "description": "new task",
+            "date": date.today(),
+            "publish": False,
+            "author": user1.pk
+        }
+        form = EventForm(data) 
+        self.assertFalse(form.is_valid())
+        response = self.client.post(reverse('events_new'), data=data) 
+        self.assertEqual(Event.objects.count(), db_count)
+
+## Test - event title greater than 128 cannot be saved
+    def test_post_not_create_event_long_title(self):   
+        db_count = Event.objects.all().count()   
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        user1=User.objects.get(pk=1)
+        data = {
+            "title": "Winter Wedding Sophie and Charlie. Winter Wedding Sophie and Charlie. Winter Wedding Sophie and Charlie. Winter Wedding Sophie and Charlie. Winter Wedding Sophie and Charlie. Winter Wedding Sophie and Charlie. Winter Wedding Sophie and Charlie. Winter Wedding Sophie and Charlie.",
+            "description": "new task",
+            "date": date.today(),
+            "publish": False,
+            "author": user1.pk
+        }
+        form = EventForm(data) 
+        self.assertFalse(form.is_valid())
+        response = self.client.post(reverse('events_new'), data=data) 
+        self.assertEqual(Event.objects.count(), db_count)
+
+## Test - empty event description cannot be saved
+    def test_post_not_create_event_no_description(self):  
+        db_count = Event.objects.all().count()   
+        login = self.client.login(username='annacarter', password='MyPassword123')    
+        user1=User.objects.get(pk=1)
+        data = {
+            "title": "new task",
+            "description": "",
+            "date": date.today(),
+            "publish": False,
+            "author": user1.pk
+        }
+        form = EventForm(data) 
+        self.assertFalse(form.is_valid())
+        response = self.client.post(reverse('events_new'), data=data) 
+        self.assertEqual(Event.objects.count(), db_count)
+
+## Test - empty event date cannot be saved
+    def test_post_not_create_event_no_date(self):
+        db_count = Event.objects.all().count()   
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        user1=User.objects.get(pk=1)
+        data = {
+            "title": "new task",
+            "description": "new description",
+            "date": "",
+            "publish": False,
+            "author": user1.pk
+        }
+        form = EventForm(data) 
+        self.assertFalse(form.is_valid())
+        response = self.client.post(reverse('events_new'), data=data) 
+        self.assertEqual(Event.objects.count(), db_count)
+
+## Test - empty publish can be saved, default is set to False
+    def test_post_create_event_no_publish(self): 
+        db_count = Event.objects.all().count()     
+        user1=User.objects.get(pk=1)
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        data = {
+            "title": "Alice's Charity Event",
+            "description": "new description",
+            "date": date.today(),
+            "author": user1.id
+        }
+        form = EventForm(data) 
+        self.assertTrue(form.is_valid())
+        response = self.client.post(reverse('events_new'), data=data) 
         self.assertEqual(Event.objects.count(), db_count+1)
 
 ## Test - if date is less than today do not create event
@@ -140,28 +262,16 @@ class EventsTests(TestCase):
         data={
             "title": "new event", 
             "description": " new description",
-            "date": "2022-11-26", 
+            "date": "2022-11-26",
+            "publish": False, 
             "author": user1.id
         }
+        form = EventForm(data) 
+        self.assertFalse(form.is_valid())
         response = self.client.post(reverse('events_new'), data=data) 
         self.assertEqual(Event.objects.count(), db_count)
 
-## Test - event deleted if user is logged in
-    def test_delete_event_logged_in(self):
-        db_count = Event.objects.all().count()
-        event1=Event.objects.get(pk=1)
-        login = self.client.login(username='annacarter', password='MyPassword123') 
-        response = self.client.delete(reverse('events_delete', kwargs={'nid': event1.pk}))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Event.objects.count(), db_count-1)
-
-## Test - event cannot be deleted if user isnt logged in
-    def test_delete_event_not_logged_in(self):
-        db_count = Event.objects.all().count()
-        event1=Event.objects.get(pk=1)
-        response = self.client.delete(reverse('events_delete', kwargs={'nid': event1.pk}))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Event.objects.count(), db_count)
+#----------- EDIT EVENT TESTS -----------#
 
 ## Test - allow logged in user to edited the form
     def test_update_event_form(self):
@@ -173,7 +283,7 @@ class EventsTests(TestCase):
         add_form.save()
         self.assertEqual(e1.title, 'Hockey Social Event')
 
-## Test - the edit event view. Event title can be edited when logged in
+## Test - the edit event form. Event title can be edited when logged in
     def test_update_event_view_logged_in(self):
         user1=User.objects.get(pk=1)
         data = {
@@ -197,7 +307,7 @@ class EventsTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
-## Test - the edit event view. Event title cannot be edited when not logged in
+## Test - the edit event form. Event title cannot be edited when not logged in
     def test_update_event_view_not_logged_in(self):
         user1=User.objects.get(pk=1)
         data = {
@@ -219,11 +329,52 @@ class EventsTests(TestCase):
         self.assertNotEqual(new_event.title, "edited_title")
         self.assertEqual(response.status_code, 302)
 
+#----------- DELETE EVENT TESTS -----------#
+
+## Test - event deleted if user is logged in
+    def test_delete_event_logged_in(self):
+        db_count = Event.objects.all().count()
+        event1=Event.objects.get(pk=1)
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        response = self.client.delete(reverse('events_delete', kwargs={'nid': event1.pk}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Event.objects.count(), db_count-1)
+
+## Test - event cannot be deleted if user isnt logged in
+    def test_delete_event_not_logged_in(self):
+        db_count = Event.objects.all().count()
+        event1=Event.objects.get(pk=1)
+        response = self.client.delete(reverse('events_delete', kwargs={'nid': event1.pk}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Event.objects.count(), db_count)
+
 
 #----------- TASK TESTS for forms, views, models and authentication -----------#
 
-# Test - non-empty title, description and deadline successfully save task to event
+
+#----------- TASK AUTHENTICATION -----------#
+
+# Test - non-empty title, description, deadline and logged in user successfully save task to event
     def test_post_create_task(self): 
+        db_count = Task.objects.all().count()
+        event = Event.objects.get(pk=1) 
+        person = Person.objects.get(pk=1)
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        data = {
+            "title": "new task",
+            "description": "new description",
+            "deadline": date.today(),
+            "complete": True, 
+            "event": event.pk,
+            "person": person.pk,
+        }
+        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
+        self.assertEqual(Task.objects.count(), db_count+1)
+        self.assertEqual(response.status_code, 302)
+
+# Test - non-empty title, description, deadline and logged in user successfully save task to event
+    def test_post_create_task(self): 
+        db_count = Task.objects.all().count()
         event = Event.objects.get(pk=1) 
         person = Person.objects.get(pk=1)
         data = {
@@ -231,26 +382,90 @@ class EventsTests(TestCase):
             "description": "new description",
             "deadline": date.today(),
             "complete": True, 
-            "event": event,
-            "person": person,
+            "event": event.pk,
+            "person": person.pk,
         }
-        form = TaskForm(data) 
-        self.assertTrue(form.is_valid())
+        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
+        self.assertEqual(Task.objects.count(), db_count)
+        self.assertEqual(response.status_code, 302)
+
+#----------- TASK MODEL -----------#
+
+## Test - Save an event with valid inputs to database
+    def test_task_save_event(self):
+        db_count = Task.objects.all().count() 
+        person=Person.objects.get(pk=1)
+        event=Event.objects.get(pk=1)
+        task = Task(title='Create guest list', description='numbers tbc', complete=False, deadline="2024-11-10", event=event, person=person) 
+        task.save()
+        self.assertEqual(db_count+1, Task.objects.all().count())
+        self.assertTrue(task.clean)
+
+## Test - cannot save empty task title (event titles are required)
+    def test_task_model_title_required(self):
+        person=Person.objects.get(pk=1)
+        event=Event.objects.get(pk=1)
+        task = Task(description='numbers tbc', complete=False, deadline="2024-11-10", event=event, person=person) 
+        self.assertRaises(ValidationError, task.full_clean)
+
+
+# ## Test - cannot save empty event description (event descriptions are required)
+    def test_task_model_description_required(self):
+        person=Person.objects.get(pk=1)
+        event=Event.objects.get(pk=1)
+        task = Task(title='Create guest list', complete=False, deadline="2024-11-10", event=event, person=person) 
+        self.assertRaises(ValidationError, task.full_clean)
+
+## Test - cannot save empty event date (event dates are required)
+    def test_task_model_deadline_required(self):
+        person=Person.objects.get(pk=1)
+        event=Event.objects.get(pk=1)
+        task = Task(title='Create guest list', description='numbers tbc', deadline="", complete=False, event=event, person=person) 
+        self.assertRaises(ValidationError, task.full_clean)
+
+## Test - cannot save deadline before todays date (event dates are to be set in the future)
+    def test_task_model_deadline_less_than_today(self):
+        person=Person.objects.get(pk=1)
+        event=Event.objects.get(pk=1)
+        task = Task(title='Create guest list', description='numbers tbc', complete=False, event=event, deadline="2021-11-26", person=person) 
+        self.assertRaises(ValidationError, task.full_clean)
+
+## Test - cannot save deadline after event date
+    def test_task_model_deadline_greater_than_event_date(self):
+        person=Person.objects.get(pk=1)
+        event=Event.objects.get(pk=1)
+        task = Task(title='Create guest list', description='numbers tbc', complete=False, event=event, deadline="2027-11-26", person=person) 
+        self.assertRaises(ValidationError, task.full_clean)
+
+## Test - can save empty complete field (complete field is false by default)
+    def test_task_model_test_complete_field_not_required(self):
+        person=Person.objects.get(pk=1)
+        event=Event.objects.get(pk=1)
+        task = Task(title='Create guest list', description='numbers tbc', event=event, deadline="2024-11-10", person=person) 
+        self.assertTrue(task.full_clean)
+
+## TODO - event and person field tests
+
+#----------- TASK FORM -----------#
 
 ## Test - task with empty title cannot be saved to event in database
     def test_post_create_task_no_title(self): 
+        db_count = Task.objects.all().count()
         event = Event.objects.get(pk=1) 
         person = Person.objects.get(pk=1)
+        login = self.client.login(username='annacarter', password='MyPassword123') 
         data = {
             "title": "",
             "description": "new description",
             "deadline": date.today(),
             "complete": True, 
-            "event": event,
-            "person": person,
+            "event": event.pk,
+            "person": person.pk,
         }
         form = TaskForm(data) 
         self.assertFalse(form.is_valid())
+        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
+        self.assertEqual(Task.objects.count(), db_count)
 
 # Test - task object creation no login, does not create another task in database
     def test_post_create_task_no_login(self):
@@ -301,6 +516,8 @@ class EventsTests(TestCase):
             "event": event.pk, 
             "person": person.pk,
         }
+        form = TaskForm(data) 
+        self.assertFalse(form.is_valid())
         response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Task.objects.count(), db_count)
@@ -309,21 +526,27 @@ class EventsTests(TestCase):
     def test_post_create_task_deadline_after_event_date(self):
         db_count = Event.objects.all().count()
         login = self.client.login(username='annacarter', password='MyPassword123') 
+        # event date is 2024-11-21
         event = Event.objects.get(pk=1) 
         person = Person.objects.get(pk=1)
         data={
             "title": "Task title",
             "description": "new description",
             "complete": True,
-            "deadline": "2023-11-26",
+            "deadline": "2025-11-26",
             "event": event.pk, 
             "person": person.pk,
         }
+        form = TaskForm(data) 
+        self.assertFalse(form.is_valid())
         response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Task.objects.count(), db_count)
 
-## Test - task deleted object if user is logged in. Test view, check the delete_success response is true
+
+#----------- TASK AJAX TESTS FOR TASK DELETE/UNCOMPLETE/COMPLETE AND EDIT -----------#
+
+## Test - task deleted object if user is logged in. Test view, check the delete_success json response is true
     def test_delete_task_logged_in(self):
         db_count = Task.objects.all().count()
         task = Task.objects.get(pk=1)
@@ -350,9 +573,7 @@ class EventsTests(TestCase):
 
 # Test - task can be complete with ajax function when user is logged in.
     def test_complete_task_logged_in(self):
-        login = self.client.login(username='annacarter', 
-        password='MyPassword123') 
-        # The task.pk=2 attribute complete set up as false
+        login = self.client.login(username='annacarter', password='MyPassword123') 
         task = Task.objects.get(pk=2)
         data = {
             "task_id": task.pk
@@ -361,6 +582,16 @@ class EventsTests(TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['complete'], True)
+
+# Test - task cannot be complete with ajax function when user is not logged in.
+    def test_complete_task_not_logged_in(self):
+        task = Task.objects.get(pk=2)
+        data = {
+            "task_id": task.pk
+        }
+        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 302)
+
 
 # Test - task can be set to uncomplete with ajax function when user is logged in.
     def test_set_to_not_complete_task_logged_in(self):
@@ -376,6 +607,15 @@ class EventsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['complete'], False)
 
+# Test - task cannot be set to uncomplete with ajax function when user is not logged in.
+    def test_set_to_not_complete_task_not_logged_in(self):
+        # The task.pk=1 attribute complete set up as true
+        task = Task.objects.get(pk=1)
+        data = {
+            "task_id": task.pk
+        }
+        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 302)
 
 # Test - task can be edited with ajax function when user is logged in.
     def test_edit_task_logged_in(self):
@@ -383,7 +623,7 @@ class EventsTests(TestCase):
         password='MyPassword123') 
         event=Event.objects.get(pk=1)
         person=Person.objects.get(pk=1)
-        # The task.pk=1 attribute complete set up as true
+        # The task.pk=1 attribute complete is true
         new_task = Task.objects.create(
             title="Create guest list",
             description="Number of people 4",

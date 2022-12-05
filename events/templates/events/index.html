@@ -25,7 +25,7 @@
             {% if events_past|length == 0 %}
             <li class="list-group-item">No events</li>
             {% else %}
-            <li class="list-group-item">{{ events_past.0 }}</li>
+            <li class="list-group-item">{{ events_past.0 | truncatechars:20}}</li>
             {% endif %}
           </ul>
           <a onclick="location.href='{% url 'past_events'%}';" href="#" class="btn btn-primary more-events-btn">More Events</a>
@@ -41,7 +41,7 @@
             {% if events_week|length == 0 %}
             <li class="list-group-item">No events</li>
             {% else %}
-            <li class="list-group-item">{{ events_week.0 }}</li>
+            <li class="list-group-item">{{ events_week.0 | truncatechars:20}}</li>
             {% endif %}
           </ul>
           <a onclick="location.href='{% url 'thisweek_events'%}';" href="#" class="btn btn-primary more-events-btn">More Events</a>
@@ -57,7 +57,7 @@
             {% if events_future|length == 0 %}
             <li class="list-group-item">No events</li>
             {% else %}
-            <li class="list-group-item">{{ events_future.0 }}</li>
+            <li class="list-group-item">{{ events_future.0 | truncatechars:20}}</li>
             {% endif %}
           </ul>
           <a onclick="location.href='{% url 'future_events'%}';" href="#" class="btn btn-primary more-events-btn">More Events</a>
