@@ -6,6 +6,8 @@ from events.models import Event, RegisteredEvent
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import View 
 from django.shortcuts import (get_object_or_404, render, redirect)
+from django.utils import timezone
+
 
 # Create your views here.
 
@@ -24,7 +26,7 @@ def show_all_events(request):
     context = {}
     # user = User.objects.get(username=request.user.username)
     # context["user"] = user
-    context["events_list"] = Event.objects.all()
+    context["events_list"] = Event.objects.filter(date__gt = timezone.now())
     return render(request, 'home/home.html', context)
 
 class RegisterEvents(View):

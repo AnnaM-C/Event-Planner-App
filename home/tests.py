@@ -19,11 +19,11 @@ class HomeTests(TestCase):
         user2.set_password('MyPassword123')
         user3.save()
 
-        e1 = Event(title='Rugby Party', description="Location tbc", date = date.today(), publish = True, author=user2) 
+        e1 = Event(title='Rugby Party', description="Location tbc", date = "2024-11-10", publish = True, author=user2) 
         e1.save()
-        e2 = Event(title='Alfies 1st Birthday', description="Location tbc", author=user1) 
+        e2 = Event(title='Alfies 1st Birthday', description="Location tbc", date = "2024-11-10", author=user1) 
         e2.save()
-        e3 = Event(title='Park Run Charity Event', description="Location: Bushy Park", date = date.today(), publish = False, author=user2) 
+        e3 = Event(title='Park Run Charity Event', description="Location: Bushy Park", date = "2024-11-10", publish = False, author=user2) 
         e3.save()
 
         register1 = RegisteredEvent.objects.create(event=e1, member=user1)
@@ -52,7 +52,7 @@ class HomeTests(TestCase):
         self.assertNotContains(response, '<button id="register-button-login"', status_code=200)
 
     
-# View test is false if user is not logged the view does not load the <button id="register-button-no_login" element
+# Test - user is not logged the view does not load the <button id="register-button-no_login" element
 # and does load the <button id="register-button-login" element
     def test_login_home_events_view(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 

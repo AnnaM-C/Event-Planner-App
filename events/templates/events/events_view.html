@@ -25,9 +25,12 @@
                 <h5 class="card-title"><a href="{% url 'events_detail' event.id %}">
                     {{ event.title}}</a></h5>
                 <p class="card-text"> {{event.description | truncatechars:20}}</p>
-                <a href="{% url 'events_detail' event.id %}" class="btn btn-primary">Tasks</a>
-                    <button id="publish-{{event.id}}" onClick='setPublish({{event.id}});' class="btn btn-primary">Publish</button>
-                </div>
+                    <a href="{% url 'events_detail' event.id %}" class="btn btn-primary">Tasks</a>
+                    {% if title != 'PAST EVENTS' %}
+                        <button id="publish-{{event.id}}" onClick='setPublish({{event.id}});' class="btn btn-primary">Publish</button>
+                    {% else %}
+                    {% endif %}
+                    </div>
                 <div class="card-footer text-muted">
                     {{ event.date }}
                 </div>

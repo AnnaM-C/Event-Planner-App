@@ -135,7 +135,7 @@ class ModelTests(TestCase):
     def test_event_save_event(self):
         db_count = Event.objects.all().count() 
         user1=User.objects.get(pk=1)
-        event = Event(title='Christmas Brunch', description='At the ned', date='2024-11-26', publish=False, author=user1) 
+        event = Event(title='Christmas Brunch', description='At the ned', date='2024-11-26', publish=True, author=user1) 
         event.save()
         self.assertEqual(db_count+1, Event.objects.all().count())
         self.assertTrue(event.clean)
@@ -203,6 +203,13 @@ class ModelTests(TestCase):
         event = Event(title="Pottery Class", description="Social event", date='2024-11-26', author=user1) 
         self.assertTrue(event.full_clean)
 
+    ## Test - cannot create a published event with date in the past
+    def test_cannot_create_publish_event_with_date_in_past(self):
+        user1=User.objects.get(pk=1)
+        event = Event(title="Pottery Class", description="Social event", date='2021-11-26', publish=True, author=user1) 
+        self.assertRaises(ValidationError, event.full_clean)
+
+
     #----------- PERSON MODEL -----------#
 
     ## Test - a new person can be saved in a model
@@ -253,7 +260,13 @@ class ModelTests(TestCase):
             pass
         self.assertRaises(TypeError, re.save())
 
-    
+    # Test - cannot register for an event in the past
+    def test_registered_to_event_in_past(self):
+        user=User.objects.get(pk=2)
+        event1 = Event(title='Winter Wedding For Sophie and Charlie.', description='Time tbc', date='2021-11-26', publish=False, author=user) 
+        re = RegisteredEvent(event=event1, member=user) 
+        self.assertRaises(ValidationError, re.full_clean)
+
     #----------- TASK MODEL -----------#
 
     ## Test - Save an event with valid inputs to database

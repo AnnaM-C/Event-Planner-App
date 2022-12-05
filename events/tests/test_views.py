@@ -124,6 +124,20 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('past_events'))
         self.assertEquals(response.status_code, 302)
 
+    ## Test events past view does not show publish button
+    def test_events_past_view_do_not_load_publish(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        response = self.client.get(reverse('past_events'))
+        # Check publish button has not been loaded
+        self.assertNotContains(response, '<button id="publish-4" onClick=\'setPublish(4);\' class="btn btn-primary">Publish</button>', status_code=200)
+
+    ## Test events this week view does show publish button
+    def test_events_this_week_view_does_load_publish(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        response = self.client.get(reverse('thisweek_events'))
+        # Check publish button has been loaded
+        self.assertContains(response, '<button id="publish-4" onClick=\'setPublish(4);\' class="btn btn-primary">Publish</button>', status_code=200)
+
     ## Test events this week view logged in
     def test_events_this_week_view_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 

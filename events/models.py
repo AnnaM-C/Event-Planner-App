@@ -17,11 +17,23 @@ class Event(models.Model):
  publish = models.BooleanField(default=False, null=False)
  author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False)
 
+ def clean(self):
+   e_date = self.date
+   e_pub = self.publish
+   if(str(e_date) < str(date.today()) and e_pub == False):
+      raise ValidationError("Cannot publish event in the past")
+   return e_date
+
+
  def __str__(self): 
-    return self.title
+   return self.title
 
  class Meta:
-  indexes = [models.Index(fields=['title']), ]
+   indexes = [models.Index(fields=['title'])]
+   indexes = [models.Index(fields=['description'])]
+   indexes = [models.Index(fields=['date'])]
+   indexes = [models.Index(fields=['publish'])]
+   indexes = [models.Index(fields=['author'])]
 
 # Person
 class Person(models.Model):
@@ -54,5 +66,11 @@ class Task(models.Model):
 class RegisteredEvent(models.Model):
    member = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False)
    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=False)
+
+   def clean(self):
+      e_date = self.event.date
+      if(str(e_date) < str(date.today())):
+         raise ValidationError("Cannot register for an event in the past!")
+      return e_date
 
 

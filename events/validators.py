@@ -1,7 +1,8 @@
 # from django.core.exceptions import ValidationError
 # from datetime import date
+# from .models import *
 
-# def validate_past_date(value):
-#     if value > date.today:
-#       raise ValidationError("This date cannot be in the past")
-#     return value
+# def ValidateDate(value):
+#     if str(value) < str(date.today()):
+#       raise ValidationError("Cannot publish date in the past")
+#     return date
