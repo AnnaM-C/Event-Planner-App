@@ -4,8 +4,6 @@ from . import views
 urlpatterns = [
     # events/
     path('', views.events_index_view, name='events_index'),
-    # events/
-    # path('registered', views.events_register_view, name='events_registered'),
     # events/id
     path('<int:pk>', views.EventDetailView.as_view(), name='events_detail'),
     # events/past
@@ -30,7 +28,6 @@ urlpatterns = [
 
     #events/id/task/new
     path('<int:nid>/task/new', views.CreateTaskView.as_view(), name='create_task'),
-    # path('<int:nid>/task/new', views.task_create_view, name='create_task'),
 
     #/events/togglecomplete
     path('togglecomplete', views.CompleteTaskView.as_view(), name='complete_task'),

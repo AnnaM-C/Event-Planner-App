@@ -5,6 +5,7 @@ from datetime import date
 from .forms import UserCreationWithEmailForm
 import json
 
+# Create your tests here.
 class HomeTests(TestCase):
     @classmethod
     def setUpTestData(cls):

@@ -53,6 +53,6 @@ class Task(models.Model):
 
 class RegisteredEvent(models.Model):
    member = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False)
-   event = models.ForeignKey(Event, on_delete=models.CASCADE)
+   event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=False)
 
 
