@@ -82,13 +82,13 @@ class HomeTests(TestCase):
         self.assertTrue(db_count+1, User.objects.all().count())
 
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertRedirects(response, '/accounts/login/')
-        self.assertNotContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
-        self.assertNotContains(response, '<ul class="errorlist"><li>This password is entirely numeric.</li></ul>')
+        self.assertRedirects(response, reverse('login'))
+        self.assertNotContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>', status_code=200)
+        self.assertNotContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>', status_code=200)
+        self.assertNotContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>', status_code=200)
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>', status_code=200)
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>', status_code=200)
+        self.assertNotContains(response, '<ul class="errorlist"><li>This password is entirely numeric.</li></ul>', status_code=200)
 
 
 # Test register form with invalid input (different passwords)
@@ -106,7 +106,7 @@ class HomeTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertFalse(User.objects.filter(username="testuser2").exists())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>')
+        self.assertContains(response, '<ul class="errorlist"><li>The two password fields didn’t match.</li></ul>', status_code=200)
 
 # Test register form with invalid input (duplicate username)
 # # Test form is invalid 
@@ -123,7 +123,7 @@ class HomeTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertFalse(User.objects.filter(username="testuser2").exists())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<ul class="errorlist"><li>A user with that username already exists.</li></ul>')
+        self.assertContains(response, '<ul class="errorlist"><li>A user with that username already exists.</li></ul>', status_code=200)
 
 # Test register form with invalid input (duplicate email)
 # Test form is invalid 
@@ -140,7 +140,7 @@ class HomeTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertFalse(User.objects.filter(username="testuser2").exists())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>')
+        self.assertContains(response, '<ul class="errorlist"><li>User with this Email address already exists.</li></ul>', status_code=200)
 
 # Test register form with invalid input (password and username similar)
 # Test form is invalid 
@@ -157,7 +157,7 @@ class HomeTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertFalse(User.objects.filter(username="testuser2").exists())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>')
+        self.assertContains(response, '<ul class="errorlist"><li>The password is too similar to the username.</li></ul>', status_code=200)
 
 # Test register form with invalid input (short password)
 # Test form is invalid 
@@ -174,7 +174,7 @@ class HomeTests(TestCase):
         self.assertFalse(User.objects.filter(username="testuser2").exists())
         self.assertFalse(form.is_valid())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>')
+        self.assertContains(response, '<ul class="errorlist"><li>This password is too short. It must contain at least 8 characters.</li>', status_code=200)
 
 # Test register form with invalid input (common password)
 # Test form is invalid 
@@ -191,7 +191,7 @@ class HomeTests(TestCase):
         self.assertFalse(User.objects.filter(username="testuser2").exists())
         self.assertFalse(form.is_valid())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>')
+        self.assertContains(response, '<ul class="errorlist"><li>This password is too common.</li></ul>', status_code=200)
 
 # Test register form with invalid input (numeric password)
 # Test form is invalid 
@@ -208,7 +208,7 @@ class HomeTests(TestCase):
         self.assertFalse(User.objects.filter(username="testuser2").exists())
         self.assertFalse(form.is_valid())
         response = self.client.post(reverse('signup_user'), data=data, follow=True)
-        self.assertContains(response, '<li>This password is entirely numeric.</li>')
+        self.assertContains(response, '<li>This password is entirely numeric.</li>', status_code=200)
 
 
 
@@ -223,7 +223,7 @@ class HomeTests(TestCase):
             "event_id": event1.pk,
             "user_id": user1.pk
         }
-        response = self.client.get(reverse('register_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')      
+        response = self.client.get(reverse('register_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)      
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['register_success'], False)
@@ -238,7 +238,7 @@ class HomeTests(TestCase):
             "event_id": event2.pk,
             "user_id": user1.pk
         }
-        response = self.client.get(reverse('register_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.get(reverse('register_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['register_success'], True)
@@ -251,7 +251,7 @@ class HomeTests(TestCase):
         data={
             'event':event1
         }
-        response = self.client.get(reverse('home'),data=data)
+        response = self.client.get(reverse('home'),data=data, follow=True)
         self.assertContains(response, event1.title, status_code=200)
 
     ## Unpublished events not viewable on homepage
@@ -260,6 +260,6 @@ class HomeTests(TestCase):
             data={
                 'event':event1
             }
-            response = self.client.get(reverse('home'),data=data)
+            response = self.client.get(reverse('home'),data=data, follow=True)
             self.assertNotContains(response, event1.title, status_code=200)
 

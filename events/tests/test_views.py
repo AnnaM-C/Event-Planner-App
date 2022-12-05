@@ -1,10 +1,8 @@
 from django.test import TestCase
 from events.models import Event, Task, User 
-from datetime import datetime, date, timedelta
-from django.db import transaction, IntegrityError
+from datetime import date, timedelta
 from django.urls import reverse
 from events.forms import *
-from django.core.exceptions import ValidationError
 
 class ViewTests(TestCase):
     @classmethod
@@ -71,13 +69,13 @@ class ViewTests(TestCase):
         # get event with past date from test data, Charlies 1st Birthday
         # get events with over a week away date from test data, Rugby Party
         # get event with date less than a week away from test data, Winterwonderland
-        response = self.client.get(reverse('events_index'))
+        response = self.client.get(reverse('events_index'), follow=True)
         # Check template content
         self.assertContains(response, '<h5 class="card-title">Manage Your Events</h5>', status_code=200)
         self.assertContains(response, '<a onclick="location.href=\'/events/nextweek\';" href="#" class="btn btn-primary more-events-btn">More Events</a>', status_code=200)
         self.assertContains(response, '<a onclick="location.href=\'/events/past\';" href="#" class="btn btn-primary more-events-btn">More Events</a>', status_code=200)
         self.assertContains(response, '<a onclick="location.href=\'/events/future\';" href="#" class="btn btn-primary more-events-btn">More Events</a>', status_code=200)
-        self.assertContains(response, '<div id="header">REGISTER NOW TO GET A SPOT AT ONE OF OUR EXCLUSIVE EVENTS</div>', status_code=200)
+        self.assertContains(response, '<div id="header">VISIT THE HOMEPAGE TO GRAB A SPOT AT ONE OF OUR EXCLUSIVE EVENTS</div>', status_code=200)
         # Check events have been loaded in the correct places on the page depending on their date
         # Past event - 'Charlies 1st Birthday'
         self.assertContains(response, '<h5 class="card-title">Past Events</h5>\n          <ul class="list-group list-group-flush">\n            \n            <li class="list-group-item">Charlies 1st Birthd', status_code=200)
@@ -88,32 +86,31 @@ class ViewTests(TestCase):
  
     ## Test events index view logged out redirects to login page
     def test_events_index_view_not_logged_in(self):
-        response = self.client.get(reverse('events_index'))
-        self.assertEquals(response.status_code, 302)
+        response = self.client.get(reverse('events_index'), follow=True)
+        self.assertEquals(response.status_code, 200)
 
     ## Test events create view logged in
     def test_events_create_view(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
-        response = self.client.get(reverse('events_new'))
+        response = self.client.get(reverse('events_new'), follow=True)
         # Check form template loaded correctly
         self.assertContains(response, '<form method="POST" enctype="multipart/form-data">', status_code=200)
         self.assertContains(response, '<input type="text" name="title" class="form-control" placeholder="Event Title" maxlength="128" required id="id_title">', status_code=200)
         self.assertContains(response, '<textarea name="description" cols="60" rows="25" class="form-control" placeholder="Event Description" required id="id_description">\n</textarea>', status_code=200)
-        self.assertContains(response, '<input type="text" name="date" value="2022-12-05" required id="id_date">', status_code=200)
-        self.assertContains(response, '<input type="hidden" name="initial-date" value="2022-12-05" id="initial-id_date">', status_code=200)
+        self.assertContains(response, '<input type="text" name="date" class="form-control" placeholder="yyyy-mm-dd" required id="id_date">', status_code=200)
         self.assertContains(response, '<input type="hidden" name="author" value="1" id="id_author">', status_code=200)
         self.assertContains(response, '<input type="submit" value="Submit">', status_code=200)
-        self.assertContains(response, '<div id="header">REGISTER NOW TO GET A SPOT AT ONE OF OUR EXCLUSIVE EVENTS</div>', status_code=200)
+        self.assertContains(response, '<div id="header">VISIT THE HOMEPAGE TO GRAB A SPOT AT ONE OF OUR EXCLUSIVE EVENTS</div>', status_code=200)
 
     ## Test events create view logged out redirects to login page
     def test_events_create_view_not_logged_in(self):
-        response = self.client.get(reverse('events_new'))
-        self.assertEquals(response.status_code, 302)
+        response = self.client.get(reverse('events_new'), follow=True)
+        self.assertEquals(response.status_code, 200)
 
     ## Test events past view logged in
     def test_events_past_view_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
-        response = self.client.get(reverse('past_events'))
+        response = self.client.get(reverse('past_events'), follow=True)
         # Check template content
         self.assertContains(response, '<div class="card text-center" style="margin-bottom: 40px">\n    <div class="card-header">\n      PAST EVENTS \n    </div>', status_code=200)
         # Check correct event has been loaded, ie. Charlies 1st birthday is an event in the past
@@ -121,27 +118,27 @@ class ViewTests(TestCase):
 
     ## Test events past view logged out redirects to login page
     def test_events_past_view_not_logged_in(self):
-        response = self.client.get(reverse('past_events'))
-        self.assertEquals(response.status_code, 302)
+        response = self.client.get(reverse('past_events'), follow=True)
+        self.assertEquals(response.status_code, 200)
 
     ## Test events past view does not show publish button
     def test_events_past_view_do_not_load_publish(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
-        response = self.client.get(reverse('past_events'))
+        response = self.client.get(reverse('past_events'), follow=True)
         # Check publish button has not been loaded
         self.assertNotContains(response, '<button id="publish-4" onClick=\'setPublish(4);\' class="btn btn-primary">Publish</button>', status_code=200)
 
     ## Test events this week view does show publish button
     def test_events_this_week_view_does_load_publish(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
-        response = self.client.get(reverse('thisweek_events'))
+        response = self.client.get(reverse('thisweek_events'), follow=True)
         # Check publish button has been loaded
         self.assertContains(response, '<button id="publish-4" onClick=\'setPublish(4);\' class="btn btn-primary">Publish</button>', status_code=200)
 
     ## Test events this week view logged in
     def test_events_this_week_view_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
-        response = self.client.get(reverse('thisweek_events'))
+        response = self.client.get(reverse('thisweek_events'), follow=True)
         # Check template content
         self.assertContains(response, '<div class="card text-center" style="margin-bottom: 40px">\n    <div class="card-header">\n      EVENTS WITHIN A WEEK \n    </div>', status_code=200)
         # Check correct event has been loaded, ie. Winterwonderland is an event within a weeks time
@@ -149,13 +146,13 @@ class ViewTests(TestCase):
 
     ## Test events this week view logged out redirects to login page
     def test_events_this_week_view_not_logged_in(self):
-        response = self.client.get(reverse('thisweek_events'))
-        self.assertEquals(response.status_code, 302)
+        response = self.client.get(reverse('thisweek_events'), follow=True)
+        self.assertEquals(response.status_code, 200)
 
     ## Test events over a week away view logged in
     def test_events_over_a_week_away_view_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
-        response = self.client.get(reverse('future_events'))
+        response = self.client.get(reverse('future_events'), follow=True)
         # Check template content
         self.assertContains(response, '<div class="card text-center" style="margin-bottom: 40px">\n    <div class="card-header">\n      EVENTS IN OVER A WEEK \n    </div>', status_code=200)
         # Check correct event has been loaded, ie. Rugby Party is an event over a weeks away
@@ -163,8 +160,8 @@ class ViewTests(TestCase):
 
     ## Test events in over a week logged out redirects to login page
     def test_events_over_a_week_away_not_logged_in(self):
-        response = self.client.get(reverse('future_events'))
-        self.assertEquals(response.status_code, 302)
+        response = self.client.get(reverse('future_events'), follow=True)
+        self.assertEquals(response.status_code, 200)
 
     ## Test events in registered view logged in
     def test_registered_events_view_logged_in(self):
@@ -173,7 +170,7 @@ class ViewTests(TestCase):
         author = User.objects.get(pk=2)
         e6 = Event.objects.create(title='Charity Fair', description="Location tbc", date = "2024-11-10", publish = True, author=author) 
         re = RegisteredEvent.objects.create(event=e6,member=user1)
-        response = self.client.get(reverse('registered_events_index'))
+        response = self.client.get(reverse('registered_events_index'), follow=True)
         # Check template content
         self.assertContains(response, '<h5 class="card-title">Your Registered Events </h5>', status_code=200)
         # Check correct event has been loaded, ie. Charity Event is an event registered in this test
@@ -183,7 +180,7 @@ class ViewTests(TestCase):
     def test_events_detail_view_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
         event = Event.objects.get(pk=1)
-        response = self.client.get(reverse('events_detail', kwargs={'pk': event.pk}))
+        response = self.client.get(reverse('events_detail', kwargs={'pk': event.pk}), follow=True)
         # Check template content
         self.assertContains(response, '<input type="button" onclick="location.href=\'/events/edit/1\';" value="Edit" />', status_code=200)
         self.assertContains(response, '<input type="button" onclick="location.href=\'/events/delete/1\';" value="Delete" />', status_code=200)
@@ -194,14 +191,14 @@ class ViewTests(TestCase):
     ## Test events detail view logged out redirects to login page
     def test_events_detail_view_not_logged_in(self):
         event = Event.objects.get(pk=1)
-        response = self.client.get(reverse('events_detail', kwargs={'pk': event.pk}))
-        self.assertEquals(response.status_code, 302)
+        response = self.client.get(reverse('events_detail', kwargs={'pk': event.pk}), follow=True)
+        self.assertEquals(response.status_code, 200)
 
     ## Test events edit page when logged in
     def test_events_edit_view_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
         event = Event.objects.get(pk=1)
-        response = self.client.get(reverse('events_update', kwargs={'nid': event.pk}))
+        response = self.client.get(reverse('events_update', kwargs={'nid': event.pk}), follow=True)
         # Check template content
         self.assertContains(response, '<form method="POST"', status_code=200)
         self.assertContains(response, '<input type="submit" value="Update">', status_code=200)
@@ -211,17 +208,18 @@ class ViewTests(TestCase):
     ## Test events detail view logged out redirects to login page
     def test_events_edit_view_not_logged_in(self):
         event = Event.objects.get(pk=1)
-        response = self.client.get(reverse('events_update', kwargs={'nid': event.pk}))
-        self.assertEquals(response.status_code, 302)
+        response = self.client.get(reverse('events_update', kwargs={'nid': event.pk}), follow=True)
+        self.assertEquals(response.status_code, 200)
 
     ## Test events delete view logged in, upon deletion, redirects user to events index page
     def test_events_delete_view_logged_in(self):
         db_count = Event.objects.count()
         login = self.client.login(username='annacarter', password='MyPassword123') 
         event = Event.objects.get(pk=1)
-        response = self.client.get(reverse('events_delete', kwargs={'nid': event.pk}))
+        response = self.client.get(reverse('events_delete', kwargs={'nid': event.pk}), follow=True)
         self.assertRedirects(response, reverse('events_index'))
         self.assertEquals(db_count-1, Event.objects.count())
+        self.assertEqual(response.status_code, 200)
 
     ## Test events publish change to publish from false to true view logged in
     def test_events_publish_ajax_false_to_tue_and_validation_logged_in(self):
@@ -232,8 +230,9 @@ class ViewTests(TestCase):
         data = {
             'event_id': event.pk
         }
-        response = self.client.get(reverse('publish_ajax_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.get(reverse('publish_ajax_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
         data = response.json()
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(data['publish'], True)
  
     ## Test events publish change to publish from true to false view logged in
@@ -245,8 +244,9 @@ class ViewTests(TestCase):
         data = {
             'event_id': event.pk
         }
-        response = self.client.get(reverse('publish_ajax_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.get(reverse('publish_ajax_event'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
         data = response.json()
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(data['publish'], False)
 
     #----------- TASKS VIEW AND TEMPLATE -----------#
@@ -255,7 +255,7 @@ class ViewTests(TestCase):
     def test_task_list_view_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
         event = Event.objects.get(pk=1)
-        response = self.client.get(reverse('task_list', kwargs={'nid': event.pk}))
+        response = self.client.get(reverse('task_list', kwargs={'nid': event.pk}), follow=True)
         # Check template content
         self.assertContains(response, '<table id="taskTable"', status_code=200)
         # Check correct edit form has been loaded, ie. Task of event with pk=1
@@ -266,7 +266,7 @@ class ViewTests(TestCase):
     def test_task_create_new_logged_in(self):
         login = self.client.login(username='annacarter', password='MyPassword123') 
         event = Event.objects.get(pk=1)
-        response = self.client.get(reverse('create_task', kwargs={'nid': event.pk}))
+        response = self.client.get(reverse('create_task', kwargs={'nid': event.pk}), follow=True)
         self.assertContains(response, '<form method="POST"', status_code=200)
         self.assertContains(response, '<input type="checkbox" name="complete"', status_code=200)
         self.assertContains(response, '<input type="submit" value="Submit">', status_code=200)
@@ -285,7 +285,7 @@ class ViewTests(TestCase):
         data = {
             "task_id": task.pk
         }
-        response = self.client.get(reverse('delete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.get(reverse('delete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
         data = response.json()
         self.assertEqual(Task.objects.count(), db_count-1)
         self.assertEqual(response.status_code, 200)
@@ -298,8 +298,8 @@ class ViewTests(TestCase):
         data = {
             "task_id": task.pk
         }
-        response = self.client.get(reverse('delete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse('delete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(Task.objects.count(), db_count)
 
     # Test - task can be complete with ajax function when user is logged in.
@@ -309,7 +309,7 @@ class ViewTests(TestCase):
         data = {
             "task_id": task.pk
         }
-        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['complete'], True)
@@ -320,8 +320,8 @@ class ViewTests(TestCase):
         data = {
             "task_id": task.pk
         }
-        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
+        self.assertEqual(response.status_code, 200)
 
     # Test - task can be set to uncomplete with ajax function when user is logged in.
     def test_set_to_not_complete_task_logged_in(self):
@@ -332,7 +332,7 @@ class ViewTests(TestCase):
         data = {
             "task_id": task.pk
         }
-        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['complete'], False)
@@ -344,8 +344,8 @@ class ViewTests(TestCase):
         data = {
             "task_id": task.pk
         }
-        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse('complete_task'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
+        self.assertEqual(response.status_code, 200)
 
     # Test - task can be edited with ajax function when user is logged in.
     def test_edit_task_logged_in(self):
@@ -368,7 +368,7 @@ class ViewTests(TestCase):
             "taskDescription": "New description",
             "eventId": event.pk,
         }
-        response = self.client.post(reverse('task_ajax_update'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.post(reverse('task_ajax_update'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
         new_task.refresh_from_db()
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(new_task.title, "New_Title")

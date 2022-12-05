@@ -18,7 +18,10 @@ class EventForm(forms.ModelForm):
             'rows' : 25,
             'cols' : 60,
             }),
-            'date': forms.DateInput(),
+            'date': forms.DateInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'yyyy-mm-dd',
+            }),
             'author': forms.HiddenInput(),
         }
 
@@ -39,7 +42,10 @@ class TaskForm(forms.ModelForm):
     'rows' : 5,
     'cols' : 40,
     }),
-  'deadline': forms.DateInput(),
+  'deadline': forms.DateInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'yyyy-mm-dd',
+            }),
   'event': forms.HiddenInput(),
   'person': forms.Select(
                choices=Person.objects.all()

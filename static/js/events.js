@@ -44,7 +44,6 @@ $("form#updateTask").submit(async function() {
     if (titleInput && descriptionInput) {
         // Create Ajax Call
         $.ajax({
-            // url: '{% "task_ajax_update" %}',
             url: '/events/edittask',
             data: {
                 id: idInput,
@@ -114,8 +113,6 @@ async function setPublish(event_id) {
 
 async function register(event_id, user_id) {
         $.ajax({
-            // url: '{% "task_ajax_update" %}',
-            // url: '{% url "register_event" %}',
             url: 'home/register',
             type: 'get',
             data: {

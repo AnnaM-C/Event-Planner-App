@@ -1,10 +1,13 @@
 from django.test import TestCase
 from events.models import Event, Task, User 
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from django.db import transaction, IntegrityError
 from django.urls import reverse
 from events.forms import *
 from django.core.exceptions import ValidationError
+
+
+
 
 class ModelTests(TestCase):
     @classmethod
@@ -74,8 +77,9 @@ class ModelTests(TestCase):
             "publish": False,
             "author": user1
         }
-        response = self.client.post(reverse('events_new'), data=data) 
+        response = self.client.post(reverse('events_new'), data=data, follow=True)
         self.assertEqual(Event.objects.count(), db_count)
+        self.assertEqual(response.status_code, 200)
 
     ## Test - can create event when logged in
     def test_post_create_event_with_login(self):
@@ -89,8 +93,10 @@ class ModelTests(TestCase):
             "publish": True, 
             "author": user1.pk
         }
-        response = self.client.post(reverse('events_new'), data=data) 
+        response = self.client.post(reverse('events_new'), data=data, follow=True) 
         self.assertEqual(Event.objects.count(), db_count+1)
+        self.assertEqual(response.status_code, 200)
+
 
     #----------- TASK AUTHENTICATION -----------#
 
@@ -108,8 +114,10 @@ class ModelTests(TestCase):
             "event": event.pk,
             "person": person.pk,
         }
-        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
+        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data, follow=True)
         self.assertEqual(Task.objects.count(), db_count+1)
+        self.assertEqual(response.status_code, 200)
+
 
     ## Test - non-empty title, description, deadline and not logged cannot save task to event
     def test_post_create_task_not_logged_in(self): 
@@ -124,8 +132,10 @@ class ModelTests(TestCase):
             "event": event.pk,
             "person": person.pk,
         }
-        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data)
+        response = self.client.post(reverse('create_task', kwargs={'nid': event.pk}), data=data, follow=True)
         self.assertEqual(Task.objects.count(), db_count)
+        self.assertEqual(response.status_code, 200)
+
 
 #----------- MODEL TESTS -----------#
 

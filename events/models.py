@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 class Event(models.Model):
  title = models.CharField(blank=False, max_length = 128, unique=True)
  description = models.TextField(blank=False)
- date = models.DateField(default=date.today, blank=False, validators=[MinValueValidator(limit_value=date.today)])
+ date = models.DateField(blank=False, validators=[MinValueValidator(limit_value=date.today)])
  publish = models.BooleanField(default=False, null=False)
  author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False)
 
@@ -48,7 +48,7 @@ class Task(models.Model):
  description = models.TextField(blank=False)
  complete = models.BooleanField(default=False)
  event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=False)
- deadline = models.DateField(default=date.today, blank=False, validators=[MinValueValidator(limit_value=date.today)])
+ deadline = models.DateField(blank=False, validators=[MinValueValidator(limit_value=date.today)])
  person = models.ForeignKey(Person, blank=False, on_delete=models.CASCADE, null=True)
 
  def clean(self):
