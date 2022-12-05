@@ -55,7 +55,7 @@ def index_nextweek_events(request):
     else:
         context["events_list"] = Event.objects.filter(date__range = [timezone.now(), timezone.now()+timedelta(days=7)], author=request.user)
         context['today'] = timezone.now()
-    context["title"] = "EVENTS NEXT WEEK"
+    context["title"] = "EVENTS WITHIN A WEEK"
     return render(request, 'events/events_view.html', context)
 
 #  view events > a week from today

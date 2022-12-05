@@ -25,7 +25,7 @@ class Event(models.Model):
 
 # Person
 class Person(models.Model):
- name = models.CharField(max_length = 128)
+ name = models.CharField(blank=False, max_length = 128)
 
  def __str__(self): 
     return self.name
@@ -37,7 +37,7 @@ class Task(models.Model):
  complete = models.BooleanField(default=False)
  event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=False)
  deadline = models.DateField(default=date.today, blank=False, validators=[MinValueValidator(limit_value=date.today)])
- person = models.ForeignKey(Person, on_delete=models.CASCADE, null=True)
+ person = models.ForeignKey(Person, blank=False, on_delete=models.CASCADE, null=True)
 
  def clean(self):
    event_date= self.event.date

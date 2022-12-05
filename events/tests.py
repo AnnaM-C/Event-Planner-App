@@ -1,6 +1,6 @@
 from django.test import TestCase
 from .models import Event, Task, User 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from django.db import transaction, IntegrityError
 from django.urls import reverse
 from .forms import *
@@ -30,6 +30,16 @@ class EventsTests(TestCase):
         e2 = Event(title='Alfies 1st Birthday', description="Location tbc", date = "2024-11-21", publish = False, author=user1) 
         e2.full_clean
         e2.save()
+        # A Past event, pk=3
+        e3 = Event(title='Charlies 1st Birthday', description="Location tbc", date = "2022-11-30", publish = False, author=user1) 
+        e3.full_clean
+        e3.save()
+
+        # An event less than 7 days away from today, pk=5
+        datetest = date.today()+timedelta(days=3)
+        e5 = Event(title='Winterwonderland', description="Location", date = datetest, publish = False, author=user1) 
+        e5.full_clean
+        e5.save()
 
         # Person object for testing
         p1 = Person(name="Tony")
@@ -45,7 +55,7 @@ class EventsTests(TestCase):
         t2.save()
 
 
-#----------- EVENT TESTS -----------#
+#----------- EVENT TESTS FOR FORMS, VIEWS, MODELS AND AUTHENTICATION -----------#
 
 #----------- EVENTS PROTECTED URLS -----------#
 
@@ -96,7 +106,6 @@ class EventsTests(TestCase):
         db_count = Event.objects.all().count()
         user1=User.objects.get(pk=1)
         event = Event(title='Rugby Party', description="Social event", date='2024-11-26', publish=False, author=user1) 
-        #with self.assertRaises(IntegrityError):
         try:
             with transaction.atomic(): 
                 event.save()
@@ -111,13 +120,19 @@ class EventsTests(TestCase):
         event = Event(title='Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds. Winter Wedding For Sophie and Charlie in the Cotswolds.', description='At the ned', date='2024-11-26', publish=False, author=user1) 
         self.assertRaises(ValidationError, event.full_clean)      
 
+## Test - cannot save empty author field
+    def test_event_model_test_author_required(self):
+        try:
+            event = Event(title="Pottery Class", description="Social event", date='2024-11-26') 
+        except TypeError:
+            pass
+        self.assertTrue(TypeError, event.save())
 
 ## Test - cannot save empty event title (event titles are required)
     def test_event_model_title_required(self):
         user1=User.objects.get(pk=1)
         event = Event(description="Social event", date='2024-11-26', publish=False, author=user1) 
         self.assertRaises(ValidationError, event.full_clean)
-
 
 ## Test - cannot save empty event description (event descriptions are required)
     def test_event_model_description_required(self):
@@ -149,9 +164,7 @@ class EventsTests(TestCase):
         event = Event(title="Pottery Class", description="Social event", date='2024-11-26', author=user1) 
         self.assertTrue(event.full_clean)
 
-## TODO - complete author tests
-
-#----------- EVENT FORM -----------#
+#----------- TEST EVENT FORM AND CORRECT MESSAGE VIEW -----------#
 
 ## Test - successfully save event form for non-empty title, description, date, publish and autor 
     def test_post_create_event(self): 
@@ -349,12 +362,174 @@ class EventsTests(TestCase):
         self.assertEqual(Event.objects.count(), db_count)
 
 
-#----------- TASK TESTS for forms, views, models and authentication -----------#
+#----------- EVENT VIEWS -----------#
 
+## Test- Load the past events index.html content in events index view
+    def test_events_index_view_logged_in(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        # get event with past date from test data, Charlies 1st Birthday
+        # get events with over a week away date from test data, Rugby Party
+        # get event with date less than a week away from test data, Winterwonderland
+        response = self.client.get(reverse('events_index'))
+        # Check template content
+        self.assertContains(response, '<h5 class="card-title">Manage Your Events</h5>', status_code=200)
+        self.assertContains(response, '<a onclick="location.href=\'/events/nextweek\';" href="#" class="btn btn-primary more-events-btn">More Events</a>', status_code=200)
+        self.assertContains(response, '<a onclick="location.href=\'/events/past\';" href="#" class="btn btn-primary more-events-btn">More Events</a>', status_code=200)
+        self.assertContains(response, '<a onclick="location.href=\'/events/future\';" href="#" class="btn btn-primary more-events-btn">More Events</a>', status_code=200)
+        self.assertContains(response, '<div id="header">REGISTER NOW TO GET A SPOT AT ONE OF OUR EXCLUSIVE EVENTS</div>', status_code=200)
+        # Check events have been loaded in the correct places on the page depending on their date
+        # Past event - 'Charlies 1st Birthday'
+        self.assertContains(response, '<h5 class="card-title">Past Events</h5>\n          <ul class="list-group list-group-flush">\n            \n            <li class="list-group-item">Charlies 1st Birthd', status_code=200)
+        # Event < a week away - 'Winterwonderland'
+        self.assertContains(response, '<h5 class="card-title">Events < Week Away</h5>\n          <ul class="list-group list-group-flush">\n            \n            <li class="list-group-item">Winterwonderland</li>', status_code=200)
+        # Event > a week away - Rugby Party
+        self.assertContains(response, '<h5 class="card-title">Events > Week Away</h5>\n          <ul class="list-group list-group-flush">\n            \n            <li class="list-group-item">Rugby Party</li>', status_code=200)
+ 
+# Test events index view logged out redirects to login page
+    def test_events_index_view_not_logged_in(self):
+        response = self.client.get(reverse('events_index'))
+        self.assertEquals(response.status_code, 302)
+
+# Test events create view logged in
+    def test_events_create_view(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        response = self.client.get(reverse('events_new'))
+        # Check form template loaded correctly
+        self.assertContains(response, '<form method="POST" enctype="multipart/form-data">', status_code=200)
+        self.assertContains(response, '<input type="text" name="title" class="form-control" placeholder="Event Title" maxlength="128" required id="id_title">', status_code=200)
+        self.assertContains(response, '<textarea name="description" cols="60" rows="25" class="form-control" placeholder="Event Description" required id="id_description">\n</textarea>', status_code=200)
+        self.assertContains(response, '<input type="text" name="date" value="2022-12-05" required id="id_date">', status_code=200)
+        self.assertContains(response, '<input type="hidden" name="initial-date" value="2022-12-05" id="initial-id_date">', status_code=200)
+        self.assertContains(response, '<input type="hidden" name="author" value="1" id="id_author">', status_code=200)
+        self.assertContains(response, '<input type="submit" value="Submit">', status_code=200)
+        self.assertContains(response, '<div id="header">REGISTER NOW TO GET A SPOT AT ONE OF OUR EXCLUSIVE EVENTS</div>', status_code=200)
+
+# Test events create view logged out redirects to login page
+    def test_events_create_view_not_logged_in(self):
+        response = self.client.get(reverse('events_new'))
+        self.assertEquals(response.status_code, 302)
+
+# Test events past view logged in
+    def test_events_past_view_logged_in(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        response = self.client.get(reverse('past_events'))
+        # Check template content
+        self.assertContains(response, '<div class="card text-center" style="margin-bottom: 40px">\n    <div class="card-header">\n      PAST EVENTS \n    </div>', status_code=200)
+        # Check correct event has been loaded, ie. Charlies 1st birthday is an event in the past
+        self.assertContains(response, '<h5 class="card-title"><a href="/events/3">\n                    Charlies 1st Birthday</a></h5>', status_code=200)
+
+# Test events past view logged out redirects to login page
+    def test_events_past_view_not_logged_in(self):
+        response = self.client.get(reverse('past_events'))
+        self.assertEquals(response.status_code, 302)
+
+# Test events this week view logged in
+    def test_events_this_week_view_logged_in(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        response = self.client.get(reverse('thisweek_events'))
+        # Check template content
+        self.assertContains(response, '<div class="card text-center" style="margin-bottom: 40px">\n    <div class="card-header">\n      EVENTS WITHIN A WEEK \n    </div>', status_code=200)
+        # Check correct event has been loaded, ie. Winterwonderland is an event within a weeks time
+        self.assertContains(response, '<h5 class="card-title"><a href="/events/4">\n                    Winterwonderland</a></h5>', status_code=200)
+
+# Test events this week view logged out redirects to login page
+    def test_events_this_week_view_not_logged_in(self):
+        response = self.client.get(reverse('thisweek_events'))
+        self.assertEquals(response.status_code, 302)
+
+# Test events over a week away view logged in
+    def test_events_over_a_week_away_view_logged_in(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        response = self.client.get(reverse('future_events'))
+        # Check template content
+        self.assertContains(response, '<div class="card text-center" style="margin-bottom: 40px">\n    <div class="card-header">\n      EVENTS IN OVER A WEEK \n    </div>', status_code=200)
+        # Check correct event has been loaded, ie. Rugby Party is an event over a weeks away
+        self.assertContains(response, '<h5 class="card-title"><a href="/events/1">\n                    Rugby Party</a>', status_code=200)
+
+# Test events this week view logged out redirects to login page
+    def test_events_over_a_week_away_not_logged_in(self):
+        response = self.client.get(reverse('future_events'))
+        self.assertEquals(response.status_code, 302)
+
+# Test events detail page when logged in
+    def test_events_detail_view_logged_in(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        event = Event.objects.get(pk=1)
+        response = self.client.get(reverse('events_detail', kwargs={'pk': event.pk}))
+        # Check template content
+        self.assertContains(response, '<input type="button" onclick="location.href=\'/events/edit/1\';" value="Edit" />', status_code=200)
+        self.assertContains(response, '<input type="button" onclick="location.href=\'/events/delete/1\';" value="Delete" />', status_code=200)
+        self.assertContains(response, '<h3>Tasks</h3>\n<table id="taskTable"', status_code=200)
+        # Check correct event has been loaded, ie. Rugby Party event with pk=1
+        self.assertContains(response, '<h2>Rugby Party</h2><hr>\n<p> Location tbc</p>\n<hr>\n<p>Date: Nov. 21, 2024<p>', status_code=200)
+
+# Test events detail view logged out redirects to login page
+    def test_events_detail_view_not_logged_in(self):
+        event = Event.objects.get(pk=1)
+        response = self.client.get(reverse('events_detail', kwargs={'pk': event.pk}))
+        self.assertEquals(response.status_code, 302)
+
+# Test events edit page when logged in
+    def test_events_edit_view_logged_in(self):
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        event = Event.objects.get(pk=1)
+        response = self.client.get(reverse('events_update', kwargs={'nid': event.pk}))
+        # Check template content
+        self.assertContains(response, '<form method="POST"', status_code=200)
+        self.assertContains(response, '<input type="submit" value="Update">', status_code=200)
+        # Check correct edit form has been loaded, ie. Rugby Party event with pk=1
+        self.assertContains(response, '<input type="text" name="title" value="Rugby Party"', status_code=200)
+
+# Test events detail view logged out redirects to login page
+    def test_events_edit_view_not_logged_in(self):
+        event = Event.objects.get(pk=1)
+        response = self.client.get(reverse('events_update', kwargs={'nid': event.pk}))
+        self.assertEquals(response.status_code, 302)
+
+# Test events delete view logged in, upon deletion, redirects user to events index page
+    def test_events_delete_view_logged_in(self):
+        db_count = Event.objects.count()
+        login = self.client.login(username='annacarter', password='MyPassword123') 
+        event = Event.objects.get(pk=1)
+        response = self.client.get(reverse('events_delete', kwargs={'nid': event.pk}))
+        self.assertRedirects(response, reverse('events_index'))
+        self.assertEquals(db_count-1, Event.objects.count())
+
+# # Test events delete view logged out redirects to login page
+    def test_events_edit_view_not_logged_in(self):
+        db_count = Event.objects.count()
+        event = Event.objects.get(pk=1)
+        response = self.client.get(reverse('events_delete', kwargs={'nid': event.pk}))
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(db_count, Event.objects.count())
+
+
+#----------- PERSON TESTS -----------#
+
+## Test - a new person can be saved in a model
+    def test_model_save_person(self):
+        db_count = Person.objects.all().count()
+        person = Person(name="Charlie")
+        person.save() 
+        self.assertEqual(db_count+1, Person.objects.all().count())
+        self.assertTrue(person.clean)
+
+# Test - cannot save name greater than 128 characters (names have max-length 128)
+    def test_person_model_name_max_length(self):
+        person = Person(name="CharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlieCharlie")
+        self.assertRaises(ValidationError, person.full_clean)  
+
+# Test - cannot person without a name (event titles have max-length 128)
+    def test_model_person_name_required(self):
+        person = Person(name="")
+        self.assertRaises(ValidationError, person.full_clean) 
+
+
+#----------- TASK TESTS FOR FORMS, VIEWS, MODELS AND AUTHENTICATION -----------#
 
 #----------- TASK AUTHENTICATION -----------#
 
-# Test - non-empty title, description, deadline and logged in user successfully save task to event
+## Test - non-empty title, description, deadline and logged in user successfully save task to event
     def test_post_create_task(self): 
         db_count = Task.objects.all().count()
         event = Event.objects.get(pk=1) 
@@ -372,7 +547,7 @@ class EventsTests(TestCase):
         self.assertEqual(Task.objects.count(), db_count+1)
         self.assertEqual(response.status_code, 302)
 
-# Test - non-empty title, description, deadline and logged in user successfully save task to event
+## Test - non-empty title, description, deadline and logged in user successfully save task to event
     def test_post_create_task(self): 
         db_count = Task.objects.all().count()
         event = Event.objects.get(pk=1) 
@@ -408,8 +583,7 @@ class EventsTests(TestCase):
         task = Task(description='numbers tbc', complete=False, deadline="2024-11-10", event=event, person=person) 
         self.assertRaises(ValidationError, task.full_clean)
 
-
-# ## Test - cannot save empty event description (event descriptions are required)
+## Test - cannot save empty event description (event descriptions are required)
     def test_task_model_description_required(self):
         person=Person.objects.get(pk=1)
         event=Event.objects.get(pk=1)
@@ -437,6 +611,24 @@ class EventsTests(TestCase):
         task = Task(title='Create guest list', description='numbers tbc', complete=False, event=event, deadline="2027-11-26", person=person) 
         self.assertRaises(ValidationError, task.full_clean)
 
+## Test - cannot save empty event (event field is required)
+    def test_task_model_event_required(self):
+        person=Person.objects.get(pk=1)
+        try:
+            task = Task(title='Create guest list', description='numbers tbc', complete=False, deadline="2024-11-10", person=person) 
+        except TypeError:
+            pass
+        self.assertRaises(TypeError, task.save())
+
+## Test - can save empty event (person field is required)
+    def test_task_model_person_required(self):
+        event=Event.objects.get(pk=1)
+        try:
+            task = Task(title='Create guest list', description='numbers tbc', complete=False, deadline="2024-11-10", event=event) 
+        except TypeError:
+            pass
+        self.assertRaises(TypeError, task.save())
+
 ## Test - can save empty complete field (complete field is false by default)
     def test_task_model_test_complete_field_not_required(self):
         person=Person.objects.get(pk=1)
@@ -444,7 +636,6 @@ class EventsTests(TestCase):
         task = Task(title='Create guest list', description='numbers tbc', event=event, deadline="2024-11-10", person=person) 
         self.assertTrue(task.full_clean)
 
-## TODO - event and person field tests
 
 #----------- TASK FORM -----------#
 
@@ -504,7 +695,7 @@ class EventsTests(TestCase):
 
 ## Test - task deadline date cannot be before todays date
     def test_post_create_task_deadline_before_today(self):
-        db_count = Event.objects.all().count()
+        db_count = Task.objects.all().count()
         login = self.client.login(username='annacarter', password='MyPassword123') 
         event = Event.objects.get(pk=1) 
         person = Person.objects.get(pk=1)
@@ -524,7 +715,7 @@ class EventsTests(TestCase):
 
 ## Test - task deadline cannot be set after event date
     def test_post_create_task_deadline_after_event_date(self):
-        db_count = Event.objects.all().count()
+        db_count = Task.objects.all().count()
         login = self.client.login(username='annacarter', password='MyPassword123') 
         # event date is 2024-11-21
         event = Event.objects.get(pk=1) 
