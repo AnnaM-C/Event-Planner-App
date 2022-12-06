@@ -6,9 +6,6 @@ from django.urls import reverse
 from events.forms import *
 from django.core.exceptions import ValidationError
 
-
-
-
 class ModelTests(TestCase):
     @classmethod
     def setUpTestData(cls):

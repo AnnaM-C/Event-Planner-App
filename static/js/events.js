@@ -1,3 +1,4 @@
+// Toggle for task, red to green, incomplete to complete functionality
 async function togglecomplete(task_id){ 
     $.ajax({
     url: '/events/togglecomplete', 
@@ -20,6 +21,7 @@ async function togglecomplete(task_id){
     });
 }
 
+// Delete task
 async function delete_t(task_id){ 
     $.ajax({
     url: '/events/deletetask', 
@@ -37,6 +39,7 @@ async function delete_t(task_id){
     });
 }
 
+// Update task
 $("form#updateTask").submit(async function() {
     var idInput = $('input[name="formId"]').val().trim();
     var titleInput = $('input[name="formTitle"]').val().trim();
@@ -65,7 +68,7 @@ $("form#updateTask").submit(async function() {
     return false;
 });
 
-// Update Django Ajax Call
+// Edit task form
 function editTask(id, eid) {
     if (id) {
       tr_id = "#task-" + id;
@@ -78,6 +81,7 @@ function editTask(id, eid) {
     }
   }
 
+  // Update task view after editing
 function updateToTaskTable(task){
     $("#task-" + task.id).children(".taskData").each(function() {
         var attr = $(this).attr("name");
@@ -89,7 +93,7 @@ function updateToTaskTable(task){
     });
 }
 
-
+// Publish event
 async function setPublish(event_id) {
     $.ajax({
         url: 'publish',
@@ -110,7 +114,7 @@ async function setPublish(event_id) {
     });
 }
 
-
+// Register for an event
 async function register(event_id, user_id) {
         $.ajax({
             url: 'home/register',

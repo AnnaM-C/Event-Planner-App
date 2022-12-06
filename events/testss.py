@@ -62,8 +62,6 @@ class EventsTests(TestCase):
 
 
 
-
-
     #----------- TEST TASK TEMPLATE VIEWS -----------#
 
 #----------- TEST REGISTERED EVENT MODEL -----------#

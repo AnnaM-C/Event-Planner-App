@@ -45,7 +45,7 @@ class TaskForm(forms.ModelForm):
   'deadline': forms.DateInput(attrs={
             'class': 'form-control',
             'placeholder': 'yyyy-mm-dd',
-            }),
+    }),
   'event': forms.HiddenInput(),
   'person': forms.Select(
                choices=Person.objects.all()

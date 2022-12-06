@@ -34,15 +34,53 @@ class HomeTests(TestCase):
 
 ## Test - Login user
     def test_login(self):
-        login = self.client.login(username='annacarter', password='MyPassword123') 
+        login = self.client.login(username='annacarter', password='MyPassword123')
+        data = {
+            'username': 'annacarter',
+            'password': 'MyPassword123',
+        } 
+        response=self.client.post(reverse('login'), data=data, follow=True)
+        # Login successful
         self.assertTrue(login)
+        # Correct view returned, user directed to page only visible if logged in
+        self.assertContains(response, '<h5 class="card-title">Manage Your Events</h5>', status_code=200)
 
-## Test - Log out user
+## Test - Log out
     def test_logout(self):
         self.client.login(username='annacarter', password='MyPassword123') 
         log_out = self.client.logout
-        # log_out = self.client.logout(username='annacarter', password='MyPassword123') 
+        response=self.client.get(reverse('logout'), follow=True)
+        # Logout successful
         self.assertTrue(log_out)
+        # Correct view returned, user directed to homepage logged out
+        self.assertContains(response, '<li class="nav-item"> <a class="nav-user" href="/accounts/login/">Login</a> </li>', status_code=200)
+        self.assertContains(response, '<div class="card-header">\n      BROWSE EVENTS\n    </div>', status_code=200)
+
+# Test - Attempt login with incorrect uername
+    def test_incorrect_login_username(self):
+        login=self.client.login(username='anacarter', password='MyPassword123') 
+        data={
+            'username': 'anacarter',
+            'password': 'MPassword',
+        }
+        response=self.client.post(reverse('login'), data=data,follow=True)
+        # Login failed
+        self.assertFalse(login)
+        # Correct view returned for incorrect password
+        self.assertContains(response, "<li>Please enter a correct username and password. Note that both fields may be case-sensitive.</li>",status_code=200)
+
+# Test - Attempt login with incorrect password
+    def test_incorrect_login_password(self):
+        login=self.client.login(username='annacarter', password='MPassword') 
+        data={
+            'username': 'annacarter',
+            'password': 'MPassword',
+        }
+        response=self.client.post(reverse('login'), data=data,follow=True)
+        # Login failed
+        self.assertFalse(login)
+        # Correct view returned for incorrect username
+        self.assertContains(response, "<li>Please enter a correct username and password. Note that both fields may be case-sensitive.</li>",status_code=200)
 
 # User is not logged in loads the <button id="register-button-no_login" element
 # and does not load the <button id="register-button-login" element

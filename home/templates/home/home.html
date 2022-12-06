@@ -32,7 +32,7 @@
                     {{ event.date }}
                 </div>
                     {% if user.id == default_if_none %}
-                <button id="register-button-no_login" onclick="location.href='{% url 'login'%}';">Register</button>
+                <button id="register-button-no_login" onclick="location.href='{% url 'login'%}';">Log In To Register</button>
                     {% else %}
                 <button id="register-button-login" class="btn btn-primary" onClick='register({{event.id}}, {{user.id}});'>Register</button>
                     {% endif %}

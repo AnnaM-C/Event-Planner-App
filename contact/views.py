@@ -5,10 +5,7 @@ from django.urls import reverse
 from .forms import ContactForm
 from django.contrib import messages
 
-def home(request):
-    context = {}
-    return render(request, 'homeapp/home.html', context)
-
+# Contact Us Page View and validations
 def contact(request):
     if request.method == "GET":
         form = ContactForm()

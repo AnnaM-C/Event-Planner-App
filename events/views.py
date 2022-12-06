@@ -19,16 +19,15 @@ def is_admin(user):
 
 #----------- EVENTS VIEW -----------#
 
+# view events index view which contains 3 sections, past events, event < a week and > a week
 @login_required
 def events_index_view(request):
     context = {}
     if is_admin(request.user): 
-        # context["events_list"] = Event.objects.all()
         context["events_past"] = Event.objects.filter(date__lt = timezone.now())
         context["events_week"] = Event.objects.filter(date__range = [timezone.now(), timezone.now()+timedelta(days=7)])
         context["events_future"] = Event.objects.filter(date__gt = timezone.now()+timedelta(days=7))
     else:
-        # context["events_list"] = Event.objects.filter(author=request.user)
         context["events_past"] = Event.objects.filter(author=request.user, date__lt = timezone.now())
         context["events_week"] = Event.objects.filter(author=request.user, date__range = [timezone.now(), timezone.now()+timedelta(days=7)])
         context["events_future"] = Event.objects.filter(author=request.user, date__gt = timezone.now()+timedelta(days=7))
@@ -71,7 +70,7 @@ def index_future_events(request):
     context["title"] = "EVENTS IN OVER A WEEK"
     return render(request, 'events/events_view.html', context)
 
-# view
+# event detail view
 class EventDetailView(LoginRequiredMixin, DetailView): 
     model = Event
     template_name = 'events/detail_view.html'
@@ -85,7 +84,7 @@ class EventDetailView(LoginRequiredMixin, DetailView):
             raise PermissionDenied()
         return context
 
-# create
+# create event
 @login_required
 def events_create_view(request):
     context = {}
@@ -101,7 +100,7 @@ def events_create_view(request):
     context['form']= form
     return render(request, "events/create_view.html", context)
 
-# update
+# update event
 @login_required
 def events_update_view(request, nid):
     context ={}
@@ -121,7 +120,7 @@ def events_update_view(request, nid):
     context["form"] = form
     return render(request, "events/update_view.html", context)
 
-# delete
+# delete the event
 @login_required
 def events_delete_view(request, nid):
     # fetch the object related to passed id
@@ -133,7 +132,7 @@ def events_delete_view(request, nid):
     messages.add_message(request, messages.SUCCESS, 'Event Deleted') # after deleting redirect to index view
     return redirect('events_index')
 
-# publish
+# publish the event
 class PublishEvent(LoginRequiredMixin, View):
  def get(self, request):
   eid = request.GET.get('event_id')
@@ -143,7 +142,9 @@ class PublishEvent(LoginRequiredMixin, View):
 
   return JsonResponse({'publish': event.publish, 'eid': eid}, status=200)
 
-# registered to events
+#-----------SIGNED UP EVENTS VIEW-----------#
+
+# events user has registered to
 @login_required
 def index_registered_events(request):
     context = {}
@@ -166,10 +167,9 @@ def index_registered_events(request):
     return render(request, "events/registered_events.html", context)
 
 
-
 #-----------TASK VIEWS-----------#
 
-# view
+# view task list
 class TaskListView(LoginRequiredMixin, ListView):
  model = Task
  template_name = 'events/task_list.html'
@@ -178,13 +178,7 @@ class TaskListView(LoginRequiredMixin, ListView):
  def get_queryset(self):
   return Task.objects.filter(event__id=self.kwargs['nid'])
 
-# def taskListView(request, nid):
-#     tasks = Task.objects.filter(event__id=nid)
-#     context = {}
-#     context['task_list'] = tasks
-#     return render(request, 'events/task_list.html', context)
-
-# create
+# create a task
 class CreateTaskView(LoginRequiredMixin, CreateView):
  model = Task
  form_class = TaskForm
@@ -197,21 +191,7 @@ class CreateTaskView(LoginRequiredMixin, CreateView):
   # redirect to the event detail view on success
   return reverse_lazy('events_detail', kwargs={'pk':self.kwargs['nid']})
 
-# def task_create_view(request):
-#     context = {}
-#     form = EventForm(request.POST or None)
-#     if(request.method == 'POST'):
-#         if form.is_valid():
-#             form.save()
-#             messages.add_message(request, messages.SUCCESS, 'Event Created')
-#             return redirect('events_index')
-#         else:
-#             messages.add_message(request, messages.ERROR, 'Invalid Form Data; Event not created')
-        
-#     context['form']= form
-#     return render(request, "events/create_view.html", context)
-
-# complete
+# complete a task
 class CompleteTaskView(LoginRequiredMixin, View):
  def get(self, request):
   tid = request.GET.get('task_id')
@@ -220,7 +200,7 @@ class CompleteTaskView(LoginRequiredMixin, View):
   task.save()
   return JsonResponse({'complete': task.complete, 'tid': tid}, status=200)
 
-# delete
+# delete a task
 class DeleteTaskView(LoginRequiredMixin, View):
  def get(self, request):
   tid = request.GET.get('task_id')
@@ -231,7 +211,7 @@ class DeleteTaskView(LoginRequiredMixin, View):
   task.delete()
   return JsonResponse({'delete_success': True, 'tid': tid}, status=200)
 
-# edit
+# edit a task
 class EditTaskView(LoginRequiredMixin, View):
      def post(self, request):
         obj = Task.objects.filter(id = request.POST.get('taskId'))

@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'events.apps.EventsConfig',
     'contact.apps.ContactConfig',
-    'tasks.apps.TasksConfig',
     'sass_processor',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -144,6 +143,6 @@ STATICFILE_DIRS = [
 ]
 
 LOGIN_REDIRECT_URL = "/events/" 
-LOGOUT_REDIRECT_URL = "/home/"
+LOGOUT_REDIRECT_URL = "/"
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

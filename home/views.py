@@ -3,32 +3,32 @@ from django.views.generic import CreateView
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from events.models import Event, RegisteredEvent
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse
 from django.views.generic import View 
-from django.shortcuts import (get_object_or_404, render, redirect)
+from django.shortcuts import (get_object_or_404, render)
 from django.utils import timezone
-
 
 # Create your views here.
 
+# home view
 def home(request):
     context = {}
     return render(request, 'home/home.html', context)
 
-
+# sing up view
 class RegisterUser(CreateView):
     model = User
     form_class = UserCreationWithEmailForm 
     template_name = 'home/register.html'
     success_url = reverse_lazy('login')
 
+# show events view
 def show_all_events(request):
     context = {}
-    # user = User.objects.get(username=request.user.username)
-    # context["user"] = user
     context["events_list"] = Event.objects.filter(date__gt = timezone.now())
     return render(request, 'home/home.html', context)
 
+# user register to events
 class RegisterEvents(View):
     def get(self, request):
     # get the event and user from the request

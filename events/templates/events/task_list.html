@@ -3,57 +3,41 @@
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
 
 <h3>Tasks</h3>
-<table id="taskTable" class="table table-striped">
+<table id="taskTable" class="table">
     <tr>
         <th>Title</th>
         <th>Description</th>
         <th>Deadline</th>
         <th>Assigned to</th>
+        <th>Delete</th>
+        <th>Edit</th>
     </tr>
+
 {% for task in task_list %}
-{% if task.complete %}
+
+{% if task.complete %}            
         <tr class="task_prompt complete" id="task-{{task.id}}" onClick='togglecomplete({{ task.id }})'>
             <td class="taskTitle taskData" name="title">{{task.title}}</td>
             <td class="taskDescription taskData" name="description">{{task.description}}</td>
             <td class="taskDeadline taskData" name="deadline">{{task.deadline}}</td>
-            <td class="taskPerson taskData" name="person">{{task.person.name}}</td>   
+            <td class="taskPerson taskData" name="person">{{task.person.name}}</td>
+            <td><button class="task_button" onClick='event.stopPropagation();delete_t({{ task.id }});' type='button'>X</button></td>
+            <td><button class="task_edit_button" onClick='editTask({{ task.id }}, {{ nid }});' data-toggle="modal" data-target="#myModal" type='button'>Edit</button></td>   
+        </tr>
 {% else %}
         <tr class="task_prompt incomplete" id="task-{{task.id}}" onClick='togglecomplete({{ task.id }})'>
             <td class="taskTitle taskData" name="title">{{task.title}}</td>
             <td class="taskDescription taskData" name="description">{{task.description}}</td>
             <td class="taskDeadline taskData" name="deadline">{{task.deadline}}</td>
             <td class="taskPerson taskData" name="person">{{task.person.name}}</td>
-{% endif %}
+            <td><button class="task_button" onClick='event.stopPropagation();delete_t({{ task.id }});' type='button'>X</button></td>
+            <td><button class="task_edit_button" onClick='editTask({{ task.id }}, {{ nid }});' data-toggle="modal" data-target="#myModal" type='button'>Edit</button></td>
         </tr>
-</table>
-<button class="task_button" onClick='event.stopPropagation();delete_t({{ task.id }});' type='button'>X</button>
-<button class="task_edit_button" onClick='editTask({{ task.id }}, {{ nid }});' data-toggle="modal" data-target="#myModal" type='button'>Edit</button>
+{% endif %}
 
-<hr/>
 
 {% endfor %}
 {% endblock %}
+</table>
 {% block javascript %}
 {% endblock javascript %}
-
-{% comment %} {% load static %}
-<script type="text/javascript" src="{% static 'js/events.js' %}"></script>
-{% block content %}
-<h3>Tasks</h3>
-{% for task in task_list %}
-<table id="taskTable" class="table table-striped">
-    <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th colspan="3">Deadline</th>
-    </tr>
- <tr class="task_prompt complete" id="task-{{task.id}}" onClick='togglecomplete({{ task.id }})'>
-    <td class="taskTitle taskData" name="title">{{task.title}}</td>
-    <td class="taskDescription taskData" name="description">{{task.description}}</td>
-    <td class="taskDeadline taskData" name="deadline">{{task.deadline}}</td>
-    <td class="taskPerson taskData" name="person">{{task.person.name}}</td>
- </tr>
-<button class="task_button form-control" onClick='event.stopPropagation();delete_t({{ task.id }});' type='button'>X</button>
-<button class="task_edit_button form-control" onClick='editTask({{ task.id }});' data-toggle="modal" data-target="#myModal" type='button'>Edit</button>
-{% endfor %}
-{% endblock content %} {% endcomment %}

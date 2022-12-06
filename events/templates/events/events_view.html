@@ -9,11 +9,13 @@
       {{title}} 
     </div>
     <div class="card-body">
-      <p class="card-text">View events or create a new event</p>
+      <p class="card-text">View your events</p>
+      {% if title != 'PAST EVENTS' %}
       <input class="btn btn-primary" type="button" onclick="location.href='{% url 'events_new'%}';" value="New Event">
+      {% else %}
+      {% endif %}
     </div>
   </div>
-    {% comment %} <p id="published"></p> {% endcomment %}
 <div class="events-cards group-of-cards row row-cols-1 row-cols-md-3 g-4">
     {% for event in events_list %}
         <div class="col">

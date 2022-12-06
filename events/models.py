@@ -1,13 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import date, datetime
-from django.core.validators import MinValueValidator, MaxLengthValidator
+from datetime import date
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-
-# def get_event_date(self) -> date:
-#    date_found = Event.objects.filter(date=self.date)
 
 #Event
 class Event(models.Model):
@@ -23,7 +20,6 @@ class Event(models.Model):
    if(str(e_date) < str(date.today()) and e_pub == False):
       raise ValidationError("Cannot publish event in the past")
    return e_date
-
 
  def __str__(self): 
    return self.title
@@ -63,6 +59,7 @@ class Task(models.Model):
  def __str__(self): 
     return self.title
 
+# Modeling people registering to events
 class RegisteredEvent(models.Model):
    member = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False)
    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=False)

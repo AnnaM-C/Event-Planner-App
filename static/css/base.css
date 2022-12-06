@@ -11,10 +11,10 @@ h1 {
   display: block; }
 
 .success {
-  background-color: #00FF00; }
+  background-color: #b3ffb3; }
 
 .error, .errorlist {
-  background-color: #FF0000; }
+  background-color: #ff8989; }
 
 .task_prompt {
   position: relative;
