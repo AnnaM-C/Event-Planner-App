@@ -1,18 +1,12 @@
-<!-- Logging In or Signing Up
+Django Application Advertising and Managing Popular Events.
 
-Signing up:
-To sign up and log in as a new user: visit the signup page.
-terminal123 can be used as an accepted password.
+Functionality:
+- Sign up as a new user to create, publish and manage events.
+- Sign up to register for public events.
+- Add notes and tasks to events before they are published.
+- Assign people to tasks and add deadlines to tasks, deadlines cannot be set after event launch date.
+- Edit or delete events and tasks.
 
-
-Log in to admin and application with credentials:
-username: annacarter
-p/w: 123456
-
-
-Please note: 
-You will need to be logged in to sign up to an event. 
-You can only sign up to an event once.
-
-Git Repository on GitHub:
-https://github.com/AnnaM-C/EventPlanner -->
+Testing:
+- Code contains vigerous testing of models, views and templates.
+- Advanced features include use of AJAX to reduce load time and improve quality of user experience.
